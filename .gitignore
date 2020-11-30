@@ -1,0 +1,29 @@
+# eclipse
+bin
+*.launch
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+#JVM
+hs_err_pid*.log
+
+#Run
+/run
+/backups
+
+# output
+gameData/
+out.txt
+run:log.txt
