@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+
 import com.gamebuster19901.excite.modding.game.file.toc.TOCFile;
 import com.gamebuster19901.excite.modding.game.file.toc.ResourceFiles;
 import com.gamebuster19901.excite.modding.game.file.toc.ResourceFiles.Resource;
@@ -50,6 +51,10 @@ public class Main {
 				System.out.println("Run directory created, add the game files to " + GAME_FILES.getCanonicalPath() + " and then run the program again");
 			}
 			else {
+				File[] gameFiles = GAME_FILES.listFiles();
+				if(gameFiles.length == 0) {
+					throw new IllegalStateException("No .toc files detected!");
+				}
 				for(File f : GAME_FILES.listFiles()) {
 					file = f;
 					if(f.getPath().endsWith(".toc")) {
@@ -70,10 +75,15 @@ public class Main {
 					}
 				}
 				
+				int amount = ResourceFiles.resourceDetails.size();
+				
+				if(amount == 0) {
+					throw new IllegalStateException("No resources detected!");
+				}
+				
 				CONSOLE.println(ResourceFiles.resourceDetails.size() + " resources detected... preparing them now...");
 				
 				int i = 0;
-				int amount = ResourceFiles.resourceDetails.size();
 				for(ResourceDetails resourceDetail : ResourceFiles.resourceDetails) {
 					if(resourceDetail.toc.resourceBundle != null) {
 						try {
@@ -101,10 +111,19 @@ public class Main {
 					message = "[WARNING] - " + message + " (" + badTocs + " bad toc file[s], check logs!)";
 				}
 				CONSOLE.println(message);
+				Thread.sleep(3000);
+				
+				int preparedAmount = ResourceFiles.resources.size();
+				
+				if(preparedAmount == 0) {
+					throw new IllegalStateException("No resources were prepared!");
+				}
+				
+				CONSOLE.println(ResourceFiles.resources.size() + " resources successfully prepared, extracting them now...");
+				
 			}
 		}
 		catch(Throwable t) {
-			CONSOLE.println("Error in " + file);
 			t.printStackTrace(CONSOLE);
 		}
 		CONSOLE.println("Terminated");
