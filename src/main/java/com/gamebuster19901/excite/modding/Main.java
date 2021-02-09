@@ -29,15 +29,9 @@ public class Main {
 		} catch (IOException e) {
 			throw new Error(e);
 		}
-		//SYSOUT = System.out;
-	}
-	
-	static {
-
 	}
 	
 	public static void main(String[] args) throws IOException {
-		File file = null;
 		try {
 			PrintStream o = new PrintStream(new File(RUN_DIR.getCanonicalPath() + File.pathSeparator + "log.txt"));
 			
@@ -56,7 +50,6 @@ public class Main {
 					throw new IllegalStateException("No .toc files detected!");
 				}
 				for(File f : GAME_FILES.listFiles()) {
-					file = f;
 					if(f.getPath().endsWith(".toc")) {
 						try {
 							new TOCFile(f);
