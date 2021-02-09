@@ -78,10 +78,10 @@ public class TOCFile implements Checked {
 		//assertNotNull(resourceBundle);
 		String message;
 		if(resourceBundle != null) {
-			message = "\n\n" + this + " has " + fileCount + " resources in " + this.resourceBundle.getName() + ":";
+			message = this + " has " + fileCount + " resources in " + this.resourceBundle.getName() + ":";
 		}
 		else {
-			message = "\n\n" + this + " has no resource file!";
+			message = this + " has no resource file!";
 		}
 		Main.SYSOUT.println(message);
 		Main.CONSOLE.println(message);

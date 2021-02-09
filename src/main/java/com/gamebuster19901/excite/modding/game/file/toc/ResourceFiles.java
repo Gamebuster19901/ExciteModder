@@ -1,6 +1,7 @@
 package com.gamebuster19901.excite.modding.game.file.toc;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -115,7 +116,7 @@ public class ResourceFiles {
 		
 		public static final String OTSR = "0TSR";
 		
-		private final ResourceDetails resourceDetails;
+		public final ResourceDetails resourceDetails;
 		
 		private final String header;
 		private byte[] unknown = new byte[79]; //79 bytes
@@ -159,6 +160,7 @@ public class ResourceFiles {
 			
 			check();
 			
+			resources.add(this);
 		}
 
 
@@ -172,6 +174,35 @@ public class ResourceFiles {
 			assertEquals(length2, length3);
 			assertEquals(nil2, (long)0);
 			assertEquals(nil3, 0);
+		}
+		
+		public void extract(File dir) throws IOException {
+			if(dir.exists()) {
+				if(dir.isDirectory()) {
+					File extractionDir = new File(dir.getCanonicalPath() + File.separator + resourceDetails.toc);
+					Main.CONSOLE.println(extractionDir);
+					if(!extractionDir.exists()) {
+						extractionDir.mkdir();
+					}
+					if(extractionDir.isDirectory()) {
+						
+					}
+					else {
+						throw new IOException(extractionDir.getCanonicalPath() + " must be a directory, not a file!");
+					}
+				}
+				else {
+					throw new IOException(dir.getCanonicalPath() + " must be a directory, not a file");
+				}
+			}
+			else {
+				throw new FileNotFoundException(dir.getCanonicalPath());
+			}
+		}
+		
+		@Override
+		public String toString() {
+			return resourceDetails.toc + File.separator + resourceDetails.getName();
 		}
 		
 	}
