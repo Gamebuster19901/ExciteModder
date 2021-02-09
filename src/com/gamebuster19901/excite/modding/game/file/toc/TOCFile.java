@@ -31,7 +31,9 @@ public class TOCFile implements Checked {
 	final int unknown3; //either 0, 128, or 1152
 	final int fileNameDirLength;
 	
-	private final Resources resources;
+	public final File resourceBundle;
+	
+	private final ResourceFiles resources;
 	
 	
 	public TOCFile(File file) throws IOException {
@@ -54,9 +56,13 @@ public class TOCFile implements Checked {
 		this.unknown3 = buf.getInt();
 		this.fileNameDirLength = buf.getInt();
 		
+		this.resourceBundle = getResourceBundle();
+		
 		check();
 		
-		this.resources = new Resources(this, buf);
+		this.resources = new ResourceFiles(this, buf);
+		
+
 	}
 	
 	public final void check() throws AssertionError {
@@ -69,12 +75,32 @@ public class TOCFile implements Checked {
 		//Main.SYSOUT.println(unknown2 + " " + this);
 		//assertEquals(unknown3, 0);
 		//Main.SYSOUT.println(unknown3 + " " + this);
-		Main.SYSOUT.println(this + " has " + fileCount + " resources: ");
+		//assertNotNull(resourceBundle);
+		String message;
+		if(resourceBundle != null) {
+			message = "\n\n" + this + " has " + fileCount + " resources in " + this.resourceBundle.getName() + ":";
+		}
+		else {
+			message = "\n\n" + this + " has no resource file!";
+		}
+		Main.SYSOUT.println(message);
+		Main.CONSOLE.println(message);
 	}
 	
 	
 	public String toString() {
 		return file.getName();
+	}
+	
+	public File getResourceBundle() {
+		for(File f : Main.GAME_FILES.listFiles()) {
+			if(!f.getPath().endsWith(".toc") && f.getName().indexOf('.') != -1) {
+				if(f.getName().substring(0, f.getName().indexOf('.')).equals(file.getName().substring(0, file.getName().indexOf('.')))) {
+					return f;
+				}
+			}
+		}
+		return null;
 	}
 	
 }

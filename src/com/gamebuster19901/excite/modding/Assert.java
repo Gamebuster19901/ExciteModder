@@ -23,4 +23,19 @@ public class Assert {
 		throw new AssertionError();
 	}
 	
+	public static void assertNotNull(Object o) {
+		if(o != null) {
+			return;
+		}
+		throw new AssertionError();
+	}
+	
+	public static void assertNil(byte[] bytes) {
+		for(int i = 0; i < bytes.length; i++) {
+			if(bytes[i] != 0) {
+				throw new AssertionError("index " + i + " is " + bytes[i]);
+			}
+		}
+	}
+	
 }
