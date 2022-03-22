@@ -1,7 +1,10 @@
 package com.gamebuster19901.excite.modding.game.file.toc;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -62,7 +65,7 @@ public class ResourceFiles {
 			buf.get(typeCode);
 			this.typeCode = new String(typeCode);
 			this.version = buf.getInt();
-			this.fileLength = buf.getInt() + 128;
+			this.fileLength = buf.getInt();
 			this.fileOffset = buf.getInt() + 128;
 			this.hash = buf.getInt();
 			this.unknown = buf.getLong();
@@ -147,7 +150,7 @@ public class ResourceFiles {
 			
 			length = buf.getInt();
 			unknown2 = buf.getInt();
-			offset = buf.getInt();
+			offset = buf.getInt() + 128;
 			nil = buf.getInt();
 			fileCount = buf.getInt();
 			length2 = buf.getInt() + 128;
@@ -167,6 +170,7 @@ public class ResourceFiles {
 		@Override
 		public void check() throws AssertionError {
 			assertEquals(header, OTSR);
+			//assertNil(unknown);
 			//assertEquals(unknown2, resourceDetails.toc.unknown2);
 			//System.out.println((int)offset);
 			//assertEquals(offset, 128);
@@ -177,26 +181,48 @@ public class ResourceFiles {
 		}
 		
 		public void extract(File dir) throws IOException {
-			if(dir.exists()) {
-				if(dir.isDirectory()) {
-					File extractionDir = new File(dir.getCanonicalPath() + File.separator + resourceDetails.toc);
-					Main.CONSOLE.println(extractionDir);
-					if(!extractionDir.exists()) {
-						extractionDir.mkdir();
-					}
-					if(extractionDir.isDirectory()) {
-						
+			try {
+				if(dir.exists()) {
+					if(dir.isDirectory()) {
+						File extractionDir = new File(dir.getCanonicalPath() + File.separator + resourceDetails.toc);
+						File extractedFile = new File(extractionDir.getCanonicalPath() + File.separator + resourceDetails.getName());
+						Main.CONSOLE.println(extractionDir);
+						if(!extractionDir.exists()) {
+							extractionDir.mkdir();
+						}
+						if(extractionDir.isDirectory()) {
+							if(!extractedFile.exists()) {
+								extractedFile.createNewFile();
+							}
+							FileOutputStream writer = new FileOutputStream(extractedFile);
+							
+							ByteBuffer byteBuffer = FileUtils.getByteBuffer(resourceDetails.resourceFile, ByteOrder.LITTLE_ENDIAN);
+							
+							System.out.println(resourceDetails.fileLength);
+							System.out.println(resourceDetails.fileNameOffset);
+							System.out.println(resourceDetails.resourceFile.length());
+							
+							byte[] data = new byte[resourceDetails.fileLength];
+							byteBuffer.get(data, resourceDetails.fileNameOffset, resourceDetails.fileLength);
+							
+							writer.write(data);
+							writer.close();
+							
+						}
+						else {
+							throw new IOException(extractionDir.getCanonicalPath() + " must be a directory, not a file!");
+						}
 					}
 					else {
-						throw new IOException(extractionDir.getCanonicalPath() + " must be a directory, not a file!");
+						throw new IOException(dir.getCanonicalPath() + " must be a directory, not a file");
 					}
 				}
 				else {
-					throw new IOException(dir.getCanonicalPath() + " must be a directory, not a file");
+					throw new FileNotFoundException(dir.getCanonicalPath());
 				}
 			}
-			else {
-				throw new FileNotFoundException(dir.getCanonicalPath());
+			catch (IndexOutOfBoundsException e) {
+				System.exit(1);
 			}
 		}
 		
