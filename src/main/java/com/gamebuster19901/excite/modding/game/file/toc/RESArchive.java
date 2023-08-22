@@ -120,10 +120,22 @@ public class RESArchive implements Checked {
 			System.out.println("PASSED null3 assertion: (" + 0 + ")");
 			assertNil(null4);
 			System.out.println("PASSED null4 assertion: (" + Arrays.toString(null4) + ")");
+			
+			if(!isCompressed()) {
+				System.out.println(this + " DOES NOT APPEAR TO BE COMPRESSED!");
+			}
 		}
 		finally {
 			System.out.println("===============FINISHED " + resourceFile.getAbsolutePath() + "===============");
 		}
+	}
+	
+	public boolean isCompressed() {
+		return compressedLength != uncompressedLength;
+	}
+	
+	public String toString() {
+		return resourceFile.getName();
 	}
 	
 }

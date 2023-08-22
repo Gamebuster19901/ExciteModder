@@ -69,7 +69,8 @@ public class Main {
 			System.out.println("Checking RES files...");
 			Thread.sleep(5000);
 			for(TOCFile toc : tocs) {
-				new RESArchive(toc).check();
+				RESArchive archive = new RESArchive(toc);
+				archive.check();
 			}
 		}
 		catch(Throwable t) {
