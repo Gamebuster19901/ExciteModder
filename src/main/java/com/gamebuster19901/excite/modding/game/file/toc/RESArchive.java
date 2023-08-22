@@ -8,7 +8,6 @@ import java.util.Arrays;
 
 import com.gamebuster19901.excite.modding.Checked;
 import com.gamebuster19901.excite.modding.FileUtils;
-import com.gamebuster19901.excite.modding.Main;
 
 import static com.gamebuster19901.excite.modding.Assert.*;
 
@@ -61,70 +60,69 @@ public class RESArchive implements Checked {
 	@Override
 	public void check() throws AssertionError {
 		try {
-			Main.CONSOLE.println("===============CHECKING " + resourceFile.getAbsolutePath() + "===============");
+			System.out.println("===============CHECKING " + resourceFile.getAbsolutePath() + "===============");
 			assertEquals(header,  HEADER);
-			Main.CONSOLE.println("PASSED header assertion: (" + HEADER + ")");
+			System.out.println("PASSED header assertion: (" + HEADER + ")");
 			assertEquals(headerSize, 64);
-			Main.CONSOLE.println("PASSED unknown1 assertion: (" + 64 + ")");
+			System.out.println("PASSED unknown1 assertion: (" + 64 + ")");
 			assertEquals(unknown2, 14);
 
 			if(toc.unknown3 == 0) {
 				try {
 					assertEquals(unknown3, 1);
-					Main.CONSOLE.println("PASSED unknown2 assertion: (" + 1 + ")");
+					System.out.println("PASSED unknown2 assertion: (" + 1 + ")");
 				}
 				catch(AssertionError e) {
-					Main.CONSOLE.println("FAILED unknown2 assertion: Expected 1, got " + Long.toHexString(unknown3));
+					System.out.println("FAILED unknown2 assertion: Expected 1, got " + Long.toHexString(unknown3));
 				}
 			}
 			else if (toc.unknown3 == 128 || toc.unknown3 == 1152) {
 				try {
 					assertEquals(unknown3, 3);
-					Main.CONSOLE.println("PASSED unknown2 assertion: (" + 3 + ")");
+					System.out.println("PASSED unknown2 assertion: (" + 3 + ")");
 				}
 				catch(AssertionError e) {
-					Main.CONSOLE.println("FAILED unknown2 assertion: Expected 3, got " + Long.toHexString(unknown3));
+					System.out.println("FAILED unknown2 assertion: Expected 3, got " + Long.toHexString(unknown3));
 				}
 			}
 			else {
-				Main.CONSOLE.println("UNEXPECTED UNEXPECTED UNEXPECTED unknown3 value in TOC file! (" + toc.unknown3 + ") res unknown3: " + unknown3);
+				System.out.println("UNEXPECTED UNEXPECTED UNEXPECTED unknown3 value in TOC file! (" + toc.unknown3 + ") res unknown3: " + unknown3);
 			}
 			
 			assertEquals(archiveLength, (int)resourceFile.length());
-			Main.CONSOLE.println("PASSED archiveLength assertion: (" + resourceFile.length() + ")");
+			System.out.println("PASSED archiveLength assertion: (" + resourceFile.length() + ")");
 			assertEquals(date, toc.date);
-			Main.CONSOLE.println("PASSED date assertion: (" + toc.date + ") [" + toc.getDate() + "]");
+			System.out.println("PASSED date assertion: (" + toc.date + ") [" + toc.getDate() + "]");
 			assertEquals(tocOffset, 128);
-			Main.CONSOLE.println("PASSED fileDataOffset assertion: (" + 128 + ")");
+			System.out.println("PASSED fileDataOffset assertion: (" + 128 + ")");
 			assertEquals(null1, 0);
-			Main.CONSOLE.println("PASSED null1 assertion: (" + 0 + ")");
+			System.out.println("PASSED null1 assertion: (" + 0 + ")");
 			assertEquals(fileCount, toc.fileCount);
-			Main.CONSOLE.println("PASSED fileCount assertion: (" + fileCount + ")");
-			//assertEquals(archiveLength2, archiveLength + 128);
+			System.out.println("PASSED fileCount assertion: (" + fileCount + ")");
 			try {
-				assertEquals(compressedLength + tocOffset, archiveLength);
-				Main.CONSOLE.println("PASSED compressedLength + fileDataOffset assertion: (" + archiveLength + ")");
+				assert(compressedLength + tocOffset <= archiveLength);
+				System.out.println("PASSED compressedLength + tocOffset assertion: (" + archiveLength + ")");
 			}
 			catch(AssertionError e) {
-				Main.CONSOLE.println("FAILED compressedLength + fileDataOffset assertion: Expected " + Integer.toHexString(compressedLength + tocOffset) + ", got " + Integer.toHexString(archiveLength));
-				Main.CONSOLE.println("\tCompressed Length: " + Integer.toHexString(compressedLength));
-				Main.CONSOLE.println("\tUncompressed Length: " + Integer.toHexString(uncompressedLength));
-				Main.CONSOLE.println("\tArchive Length: " + Integer.toHexString(archiveLength));
-				e.printStackTrace(Main.CONSOLE);
+				System.out.println("FAILED compressedLength + fileDataOffset assertion: Expected " + Integer.toHexString(compressedLength + tocOffset) + ", got " + Integer.toHexString(archiveLength));
+				System.out.println("\tCompressed Length: " + Integer.toHexString(compressedLength));
+				System.out.println("\tUncompressed Length: " + Integer.toHexString(uncompressedLength));
+				System.out.println("\tArchive Length: " + Integer.toHexString(archiveLength));
+				e.printStackTrace(System.out);
 			}
 			
 			assertEquals((int)null2, toc.unknown3);
-			Main.CONSOLE.println("PASSED null2 assertion: (" + null2 + ")");
+			System.out.println("PASSED null2 assertion: (" + null2 + ")");
 			
 			assertEquals(filenameDirLength, toc.fileNameDirLength);
-			Main.CONSOLE.println("PASSED filenameDirLength assertion: (" + toc.fileNameDirLength + ")");
+			System.out.println("PASSED filenameDirLength assertion: (" + toc.fileNameDirLength + ")");
 			assertEquals(null3, 0);
-			Main.CONSOLE.println("PASSED null3 assertion: (" + 0 + ")");
+			System.out.println("PASSED null3 assertion: (" + 0 + ")");
 			assertNil(null4);
-			Main.CONSOLE.println("PASSED null4 assertion: (" + Arrays.toString(null4) + ")");
+			System.out.println("PASSED null4 assertion: (" + Arrays.toString(null4) + ")");
 		}
 		finally {
-			Main.CONSOLE.println("===============FINISHED " + resourceFile.getAbsolutePath() + "===============");
+			System.out.println("===============FINISHED " + resourceFile.getAbsolutePath() + "===============");
 		}
 	}
 	

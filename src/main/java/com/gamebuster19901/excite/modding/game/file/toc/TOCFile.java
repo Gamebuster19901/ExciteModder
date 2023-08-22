@@ -91,7 +91,7 @@ public class TOCFile implements Checked {
 
 		//Main.SYSOUT.println(unknown2 + " " + this);
 		//assertEquals(unknown3, 0); //0, 128, or 1152
-		Main.CONSOLE.println(unknown3 + " " + this);
+		System.out.println(unknown3 + " " + this);
 		//assertNotNull(resourceBundle);
 		String message;
 		if(resourceBundle != null) {
@@ -100,8 +100,7 @@ public class TOCFile implements Checked {
 		else {
 			message = this + " has no resource file!";
 		}
-		Main.SYSOUT.println(message);
-		Main.CONSOLE.println(message);
+		System.out.println(message);
 	}
 	
 	public String getDate() {

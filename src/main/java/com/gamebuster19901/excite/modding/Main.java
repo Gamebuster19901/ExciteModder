@@ -17,11 +17,11 @@ public class Main {
 	public static final File RUN_DIR = new File("./run");
 	public static final File GAME_FILES = new File("./gameData");
 	public static final File LOG; 
-	public static final PrintStream CONSOLE = System.out;
-	public static final PrintStream SYSOUT;
+	private static final PrintStream CONSOLE = System.out;
+	private static final PrintStream LOGOUT;
 	static {
 		try {
-			SYSOUT = new PrintStream(new FileOutputStream(new File("./out.txt")));
+			
 			if(!RUN_DIR.exists()) {
 				RUN_DIR.mkdirs();
 				GAME_FILES.mkdirs();
@@ -31,6 +31,9 @@ public class Main {
 			LOG = new File(RUN_DIR.getCanonicalPath() + File.separator + "log.txt");
 			LOG.delete();
 			LOG.createNewFile();
+			LOGOUT = new PrintStream(new FileOutputStream(LOG));
+			PrintStream stdout = new PrintStream(new MultiOutputStream(CONSOLE, LOGOUT));
+			System.setOut(stdout);
 		} catch (IOException e) {
 			throw new Error(e);
 		}
@@ -40,11 +43,6 @@ public class Main {
 	public static void main(String[] args) {
 		ArrayList<TOCFile> tocs = new ArrayList<>();
 		try {
-			PrintStream o = new PrintStream(new File(RUN_DIR.getCanonicalPath() + File.separator + "log.txt"));
-			
-			System.setOut(o);
-			System.setErr(o);
-			
 			int badTocs = 0;
 			
 			File[] gameFiles = GAME_FILES.listFiles();
@@ -59,9 +57,8 @@ public class Main {
 					}
 					catch(Throwable t) {
 						System.err.println("Unable to load toc file " + f.getName());
-						CONSOLE.println("Unable to load toc file " + f.getName());
-						t.printStackTrace(System.out);
-						t.printStackTrace(CONSOLE);
+						System.out.println("Unable to load toc file " + f.getName());
+						t.printStackTrace();
 						badTocs++;
 						if(badTocs < 3) {
 							Thread.sleep(3000);
@@ -69,16 +66,16 @@ public class Main {
 					}
 				}
 			}
-			CONSOLE.println("Checking RES files...");
+			System.out.println("Checking RES files...");
 			Thread.sleep(5000);
 			for(TOCFile toc : tocs) {
 				new RESArchive(toc).check();
 			}
 		}
 		catch(Throwable t) {
-			t.printStackTrace(CONSOLE);
+			t.printStackTrace();
 		}
-		CONSOLE.println("\nTerminated");
+		System.out.println("\nTerminated");
 	}
 	
 	/*
@@ -103,7 +100,7 @@ public class Main {
 					}
 					catch(Throwable t) {
 						System.err.println("Unable to load toc file " + f.getName());
-						CONSOLE.println("Unable to load toc file " + f.getName());
+						System.out.println("Unable to load toc file " + f.getName());
 						t.printStackTrace(System.out);
 						t.printStackTrace(CONSOLE);
 						badTocs++;
@@ -120,18 +117,18 @@ public class Main {
 				throw new IllegalStateException("No resources detected!");
 			}
 			
-			CONSOLE.println(ResourceFiles.resourceDetails.size() + " resources detected... preparing them now...");
+			System.out.println(ResourceFiles.resourceDetails.size() + " resources detected... preparing them now...");
 			
 			int i = 0;
 			for(ResourceDetails resourceDetail : ResourceFiles.resourceDetails) {
 				if(resourceDetail.toc.resourceBundle != null) {
 					try {
 						new Resource(resourceDetail);
-						CONSOLE.println("[" + (int)((((double)++i / (double)amount)) * 100) + "%] - Prepared " + resourceDetail.toc + "/" + resourceDetail.getName());
+						System.out.println("[" + (int)((((double)++i / (double)amount)) * 100) + "%] - Prepared " + resourceDetail.toc + "/" + resourceDetail.getName());
 					}
 					catch (Throwable t) {
 						String message = "Unable to prepare " + resourceDetail.toc + "/" + resourceDetail.getName();
-						CONSOLE.println(message);
+						System.out.println(message);
 						System.err.println(message);
 						t.printStackTrace(CONSOLE);
 						t.printStackTrace(System.err);
@@ -141,7 +138,7 @@ public class Main {
 			
 			if(i != amount) {
 				String message = "[WARNING] - Unable to prepare " + (amount - i) + " resources ";
-				CONSOLE.println(message);
+				System.out.println(message);
 				System.err.println(message);
 			}
 			
@@ -150,9 +147,9 @@ public class Main {
 				if(badTocs > 0) {
 					message = "[WARNING] - " + message + " (" + badTocs + " bad toc file[s], check logs!)";
 				}
-				CONSOLE.println("\n" + message);
+				System.out.println("\n" + message);
 				Thread.sleep(1500);
-				CONSOLE.println();
+				System.out.println();
 				Thread.sleep(1500);
 			}
 			
@@ -162,22 +159,22 @@ public class Main {
 				throw new IllegalStateException("No resources were prepared!");
 			}
 			
-			CONSOLE.println(ResourceFiles.resources.size() + " resources successfully prepared, extracting them now...");
+			System.out.println(ResourceFiles.resources.size() + " resources successfully prepared, extracting them now...");
 			
 			Thread.sleep(1500);
 			
-			CONSOLE.println();
+			System.out.println();
 			
 			int extracted = 0;
 			
 			for(Resource resource : ResourceFiles.resources) {
 				try {
 					resource.extract(RUN_DIR);
-					CONSOLE.println("[" + (int)((((double)++extracted / (double)preparedAmount)) * 100) + "%] - Extracted " + resource);
+					System.out.println("[" + (int)((((double)++extracted / (double)preparedAmount)) * 100) + "%] - Extracted " + resource);
 				}
 				catch(Throwable t) {
 					String message = "[WARNING] - Unable to extract " + resource;
-					CONSOLE.println(message);
+					System.out.println(message);
 					t.printStackTrace(CONSOLE);
 					System.err.println(message);
 					t.printStackTrace(System.err);
@@ -188,11 +185,11 @@ public class Main {
 				throw new IllegalStateException("Extracted 0 resources!");
 			}
 			
-			CONSOLE.println("\nExtracted " + extracted + "/" +  preparedAmount + "/" + amount + " resources");
+			System.out.println("\nExtracted " + extracted + "/" +  preparedAmount + "/" + amount + " resources");
 			Thread.sleep(1500);
 			if(extracted != amount) {
 				String message = "\n[WARNING] - Unable to extract " + (amount - extracted) + " total detected resources";
-				CONSOLE.println(message);
+				System.out.println(message);
 				System.err.println(message);
 			}
 			Thread.sleep(1500);
@@ -200,7 +197,7 @@ public class Main {
 		catch(Throwable t) {
 			t.printStackTrace(CONSOLE);
 		}
-		CONSOLE.println("\nTerminated");
+		System.out.println("\nTerminated");
 	}
 	*/
 }
