@@ -2,11 +2,18 @@ package com.gamebuster19901.excite.modding;
 
 public class Assert {
 
+	public static void assertEquals(Number a, Number b) {
+		if(a.equals(b)) {
+			return;
+		}
+		throw new AssertionError(a.toString() + " " + a.getClass().getName() + " != " + b.toString() + " " + b.getClass().getName());
+	}
+	
 	public static void assertEquals(Object a, Object b) {
 		if(a.equals(b)) {
 			return;
 		}
-		throw new AssertionError(a.toString() + " != " + b);
+		throw new AssertionError(a.toString() + " != " + b.toString());
 	}
 	
 	public static void assertTrue(boolean expression) {

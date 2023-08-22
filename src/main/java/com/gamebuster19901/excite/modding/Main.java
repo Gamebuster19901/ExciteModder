@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 
+import com.gamebuster19901.excite.modding.game.file.toc.RESArchive;
 import com.gamebuster19901.excite.modding.game.file.toc.TOCFile;
-import com.gamebuster19901.excite.modding.game.file.toc.ResourceFiles;
-import com.gamebuster19901.excite.modding.game.file.toc.ResourceFiles.Resource;
-import com.gamebuster19901.excite.modding.game.file.toc.ResourceFiles.ResourceDetails;
 
 public class Main {
 	static {
@@ -37,6 +36,52 @@ public class Main {
 		}
 	}
 	
+	
+	public static void main(String[] args) {
+		ArrayList<TOCFile> tocs = new ArrayList<>();
+		try {
+			PrintStream o = new PrintStream(new File(RUN_DIR.getCanonicalPath() + File.separator + "log.txt"));
+			
+			System.setOut(o);
+			System.setErr(o);
+			
+			int badTocs = 0;
+			
+			File[] gameFiles = GAME_FILES.listFiles();
+			if(gameFiles.length == 0) {
+				throw new IllegalStateException("No .toc files detected!");
+			}
+			for(File f : GAME_FILES.listFiles()) {
+				if(f.getPath().endsWith(".toc")) {
+					try {
+						tocs.add(new TOCFile(f));
+						System.out.println(f + " is valid");
+					}
+					catch(Throwable t) {
+						System.err.println("Unable to load toc file " + f.getName());
+						CONSOLE.println("Unable to load toc file " + f.getName());
+						t.printStackTrace(System.out);
+						t.printStackTrace(CONSOLE);
+						badTocs++;
+						if(badTocs < 3) {
+							Thread.sleep(3000);
+						}
+					}
+				}
+			}
+			CONSOLE.println("Checking RES files...");
+			Thread.sleep(5000);
+			for(TOCFile toc : tocs) {
+				new RESArchive(toc).check();
+			}
+		}
+		catch(Throwable t) {
+			t.printStackTrace(CONSOLE);
+		}
+		CONSOLE.println("\nTerminated");
+	}
+	
+	/*
 	public static void main(String[] args) throws IOException {
 		try {
 			PrintStream o = new PrintStream(new File(RUN_DIR.getCanonicalPath() + File.separator + "log.txt"));
@@ -157,4 +202,5 @@ public class Main {
 		}
 		CONSOLE.println("\nTerminated");
 	}
+	*/
 }
