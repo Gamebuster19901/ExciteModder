@@ -1,6 +1,8 @@
 package com.gamebuster19901.excite.modding.game.file.toc;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -38,7 +40,7 @@ public class TOCFile implements Checked {
 	
 	final byte[] fileData;
 	
-	final byte[] fileNameDir;
+	final String fileNameDir;
 	
 	public final File resourceBundle;
 	
@@ -68,8 +70,9 @@ public class TOCFile implements Checked {
 		this.fileData = new byte[fileCount * 40];
 		buf.get(fileData);
 		
-		this.fileNameDir = new byte[fileNameDirLength];
-		buf.get(fileNameDir);
+		byte[] fileNameDirBytes = new byte[fileNameDirLength];
+		buf.get(fileNameDirBytes);
+		this.fileNameDir = new String(fileNameDirBytes);
 		
 		assertFalse(buf.hasRemaining());
 		
@@ -121,6 +124,113 @@ public class TOCFile implements Checked {
 			}
 		}
 		return null;
+	}
+	
+	public class TOCEntry {
+		
+		protected final int filenameOffset;
+		protected final int typeCode;
+		protected final int typeInt;
+		protected final int fileLength;
+		protected final int fileOffset;
+		protected final int unknown;
+		
+		TOCEntry(int filenameOffset, int typeCode, int typeInt, int fileLength, int fileOffset, int unknown) {
+			this.filenameOffset = filenameOffset;
+			this.typeCode = typeCode;
+			this.typeInt = typeInt;
+			this.fileLength = fileLength;
+			this.fileOffset = fileOffset;
+			this.unknown = unknown;
+		}
+		
+		public TOCEntry(ByteBuffer buffer) {
+			this(buffer.getInt(), buffer.getInt(), buffer.getInt(), buffer.getInt(), buffer.getInt(), buffer.getInt());
+		}
+		
+		public Resource getResource() {
+			return new Resource(this);
+		}
+		
+		public static TOCEntry fromBytes(TOCFile file, byte[] bytes) {
+			if(bytes.length != 40) {
+				throw new IllegalArgumentException("TOC Entry must be exactly 40 bytes! (got " + bytes.length + ")");
+			}
+			return file.new TOCEntry(ByteBuffer.wrap(bytes));
+		}
+		
+		public int getFilenameOffset() {
+			return filenameOffset;
+		}
+		
+		public int getTypeCode() {
+			return typeCode;
+		}
+		
+		public int getTypeInt() {
+			return typeInt;
+		}
+		
+		public int getFileLength() {
+			return fileLength;
+		}
+		
+		public int getFileOffset() {
+			return fileOffset;
+		}
+		
+		public int getUnknown() {
+			return unknown;
+		}
+		
+		public final byte[] toDirectoryBytes() {
+			final byte[] ret = new byte[40];
+			final ByteBuffer writer = ByteBuffer.wrap(ret);
+			writer.putInt(filenameOffset);
+			writer.putInt(typeCode);
+			writer.putInt(typeInt);
+			writer.putInt(fileLength);
+			writer.putInt(fileOffset);
+			writer.putInt(unknown);
+			final byte nil = 0;
+			for(int i = writer.position(); i < 40; i++) {
+				writer.put(nil);
+			}
+			return ret;
+		}
+		
+	}
+	
+	public class Resource extends TOCEntry {
+		
+		private final TOCEntry entry;
+		private final String name;
+		
+		public Resource(TOCEntry entry) {
+			super(entry.filenameOffset, entry.typeCode, entry.typeInt, entry.fileLength, entry.fileOffset, entry.unknown);
+			this.entry = entry;
+			this.name = name();
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		private String name() {
+			String name = TOCFile.this.fileNameDir.substring(this.entry.filenameOffset);
+			name = name.substring(0, name.indexOf('\0'));
+			return name;
+		}
+		
+		public byte[] getResourceBytes() throws IOException {
+			final byte[] ret = new byte[fileLength];
+			final ByteBuffer writer = ByteBuffer.wrap(ret);
+			final File bundle = TOCFile.this.getResourceBundle();
+			FileInputStream fis = new FileInputStream(bundle);
+			fis.read(ret, fileOffset, fileLength);
+			return ret;
+		}
+		
 	}
 	
 }

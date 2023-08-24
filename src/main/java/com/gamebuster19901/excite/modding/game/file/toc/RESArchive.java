@@ -138,4 +138,8 @@ public class RESArchive implements Checked {
 		return resourceFile.getName();
 	}
 	
+	public int getResourceCount() {
+		return fileCount;
+	}
+	
 }
