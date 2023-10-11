@@ -9,6 +9,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashSet;
+import java.util.UUID;
 
 import com.gamebuster19901.excite.modding.Checked;
 import com.gamebuster19901.excite.modding.FileUtils;
@@ -125,6 +127,16 @@ public class TOCFile implements Checked {
 		return null;
 	}
 	
+	public LinkedHashSet<Resource> getResources() {
+		LinkedHashSet<Resource> resources = new LinkedHashSet<Resource>();
+		ByteBuffer reader = ByteBuffer.wrap(fileData).order(ByteOrder.LITTLE_ENDIAN);
+		//reader.position(0x28);
+		while(reader.position() < reader.capacity()) {
+			assertTrue(resources.add(new Resource(new TOCEntry(reader))));
+		}
+		return resources;
+	}
+	
 	public class TOCEntry {
 		
 		protected final int filenameOffset;
@@ -133,18 +145,20 @@ public class TOCFile implements Checked {
 		protected final int fileLength;
 		protected final int fileOffset;
 		protected final int unknown;
+		protected final UUID uuid;
 		
-		TOCEntry(int filenameOffset, int typeCode, int typeInt, int fileLength, int fileOffset, int unknown) {
+		TOCEntry(int filenameOffset, int typeCode, int typeInt, int fileLength, int fileOffset, int unknown, UUID uuid) {
 			this.filenameOffset = filenameOffset;
 			this.typeCode = typeCode;
 			this.typeInt = typeInt;
 			this.fileLength = fileLength;
 			this.fileOffset = fileOffset;
 			this.unknown = unknown;
+			this.uuid = uuid;
 		}
 		
 		public TOCEntry(ByteBuffer buffer) {
-			this(buffer.getInt(), buffer.getInt(), buffer.getInt(), buffer.getInt(), buffer.getInt(), buffer.getInt());
+			this(assertOrder(testIndex(buffer), ByteOrder.LITTLE_ENDIAN).getInt(), buffer.getInt(), buffer.getInt(), buffer.getInt(), buffer.getInt(), buffer.getInt(), new UUID(buffer.getLong(), buffer.getLong()));
 		}
 		
 		public Resource getResource() {
@@ -155,7 +169,7 @@ public class TOCFile implements Checked {
 			if(bytes.length != 40) {
 				throw new IllegalArgumentException("TOC Entry must be exactly 40 bytes! (got " + bytes.length + ")");
 			}
-			return file.new TOCEntry(ByteBuffer.wrap(bytes));
+			return file.new TOCEntry(ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN));
 		}
 		
 		public int getFilenameOffset() {
@@ -182,9 +196,13 @@ public class TOCFile implements Checked {
 			return unknown;
 		}
 		
+		public UUID getUUID() {
+			return uuid;
+		}
+		
 		public final byte[] toDirectoryBytes() {
 			final byte[] ret = new byte[40];
-			final ByteBuffer writer = ByteBuffer.wrap(ret);
+			final ByteBuffer writer = ByteBuffer.allocate(40).order(ByteOrder.BIG_ENDIAN);
 			writer.putInt(filenameOffset);
 			writer.putInt(typeCode);
 			writer.putInt(typeInt);
@@ -198,6 +216,20 @@ public class TOCFile implements Checked {
 			return ret;
 		}
 		
+		public String toDebugString() {
+			return 
+				"Filename Offset: " + Integer.toHexString(filenameOffset) + "\n" +
+				"Type Code: " + Integer.toHexString(typeCode) + "\n" +
+				"Type Int" + Integer.toHexString(typeInt)
+					
+			;
+			
+		}
+		
+		public String toString() {
+			return TOCFile.this.toString();
+		}
+		
 	}
 	
 	public class Resource extends TOCEntry {
@@ -206,7 +238,7 @@ public class TOCFile implements Checked {
 		private final String name;
 		
 		public Resource(TOCEntry entry) {
-			super(entry.filenameOffset, entry.typeCode, entry.typeInt, entry.fileLength, entry.fileOffset, entry.unknown);
+			super(entry.filenameOffset, entry.typeCode, entry.typeInt, entry.fileLength, entry.fileOffset, entry.unknown, entry.uuid);
 			this.entry = entry;
 			this.name = name();
 		}
@@ -216,20 +248,39 @@ public class TOCFile implements Checked {
 		}
 		
 		private String name() {
+			//System.out.println(toDebugString());
 			String name = TOCFile.this.fileNameDir.substring(this.entry.filenameOffset);
 			name = name.substring(0, name.indexOf('\0'));
+			System.out.println("Found " + name);
 			return name;
 		}
 		
-		public byte[] getResourceBytes() throws IOException {
+		public byte[] toResourceBytes() throws IOException {
 			final byte[] ret = new byte[fileLength];
-			final ByteBuffer writer = ByteBuffer.wrap(ret);
 			final File bundle = TOCFile.this.getResourceBundle();
 			FileInputStream fis = new FileInputStream(bundle);
-			fis.read(ret, fileOffset, fileLength);
+			System.out.println("N: " + ret.length);
+			System.out.println("OFFSET: " + fileOffset);
+			System.out.println("LENGTH: " + fileLength);
+			fis.read(ret, fileOffset, fileLength - fileOffset);
+			fis.close();
 			return ret;
 		}
 		
+		public String toString() {
+			return name;
+		}
+		
+	}
+	
+	private ByteBuffer assertOrder(ByteBuffer buf, ByteOrder order) {
+		assertTrue(buf.order() == order);
+		return buf;
+	}
+	
+	private ByteBuffer testIndex(ByteBuffer buf) {
+		//System.out.println("POSITION:" + buf.position());
+		return buf;
 	}
 	
 }

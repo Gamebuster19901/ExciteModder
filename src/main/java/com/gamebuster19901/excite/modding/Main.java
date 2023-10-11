@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import com.gamebuster19901.excite.modding.game.file.toc.RESArchive;
 import com.gamebuster19901.excite.modding.game.file.toc.TOCFile;
+import com.gamebuster19901.excite.modding.game.file.toc.TOCFile.Resource;
 
 public class Main {
 	static {
@@ -71,6 +72,26 @@ public class Main {
 			for(TOCFile toc : tocs) {
 				RESArchive archive = new RESArchive(toc);
 				archive.check();
+			}
+			System.out.println("Extracting resource files...");
+			for(TOCFile toc : tocs) {
+				if(new RESArchive(toc).isCompressed()) {
+					System.out.println("Skipping " + toc + " - File is compressed!");
+					continue;
+				}
+				else {
+					System.out.println("Extracting " + toc);
+				}
+				File output = new File(RUN_DIR.getCanonicalPath() + "/" + toc.getResourceBundle().getName());
+				output.mkdirs();
+				for(Resource resource : toc.getResources()) {
+					System.out.println(resource.toDebugString());
+					File resourceOutput = new File(output.getCanonicalPath() + "/" + resource.getName());
+					resourceOutput.createNewFile();
+					FileOutputStream fos = new FileOutputStream(resourceOutput);
+					fos.write(resource.toResourceBytes());
+					fos.close();
+				}
 			}
 		}
 		catch(Throwable t) {
