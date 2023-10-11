@@ -13,12 +13,17 @@ public class MGRLC { //Monster Games Run-Length Compression
 			if(compressed.order() != ByteOrder.LITTLE_ENDIAN) {
 				throw new IllegalStateException("Compressed buffer is not little endian");
 			}
-			
+			compressed.order(ByteOrder.BIG_ENDIAN);
 			while(compressed.position() < compressed.limit()) {
+				System.out.println("================================");
 				final int header = compressed.getInt();
+				System.out.println("HEADER INDEX: " + compressed.position());
+				System.out.println("HEADER: " + Integer.toHexString(header));
 				for(int i = 0; i < 31; i++) { //for each bit in 32 bit header, except the last one
 					if((header & (1)) == 0) { //if bit at position i is 0
-						decompressed.put(compressed.get()); //Read a single byte out of the compressed data buffer into the decompressed data buffer
+						byte b = compressed.get();
+						decompressed.put(b); //Read a single byte out of the compressed data buffer into the decompressed data buffer
+						System.out.println("SINGLE BYTE AT 0x" + Integer.toHexString(compressed.position()) + ": " + Integer.toHexString(Byte.toUnsignedInt(b)));
 					}
 					else if ((header & (1)) == 1) { //else if bit at position i is 1
 						//we need to read the indicator values to determine how to interperet the upcoming data
@@ -49,6 +54,7 @@ public class MGRLC { //Monster Games Run-Length Compression
 									System.out.println("CASE 11");
 									//Java has no 24 bit primitives, so we must read an int
 									int read = compressed.getInt();
+									System.out.println("READ " + Integer.toHexString(read));
 									if((read & 0b1111100) != 0) { //if value is 24 bit
 										seekback = read >> 15;
 										toRead = ((((read >> 8) & 0b1111100) >> 2) + 2); //RShift 8 is due to being 24 bits;
@@ -63,12 +69,14 @@ public class MGRLC { //Monster Games Run-Length Compression
 							default:
 								throw new AssertionError("Indicator flag is " + Integer.toBinaryString(indicator));
 						}
-						decompressed.mark();
+						int mark = decompressed.position();
+						System.out.println("MARK AT INDEX " + mark);
 						decompressed.position(decompressed.position() - seekback); //seek back
+						System.out.println("SEEKBACK: " + seekback);
 						byte[] readBytes = new byte[toRead];
 						decompressed.get(new byte[toRead]);
 						decompressed.put(readBytes);
-						decompressed.reset(); //reset position to last mark
+						decompressed.position(mark); //reset position to last mark
 					}
 					else {
 						throw new AssertionError("bit should be 0 or 1, got " + (header & (1 << i)) + ". Buffer position: " + compressed.position() + ", bit " + i + ".");

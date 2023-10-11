@@ -2,6 +2,7 @@ package com.gamebuster19901.excite.modding.game.file.toc;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -259,16 +260,34 @@ public class TOCFile implements Checked {
 			final byte[] ret = new byte[fileLength];
 			final File bundle = TOCFile.this.getResourceBundle();
 			FileInputStream fis = new FileInputStream(bundle);
+			fis.skip(0x84); //skip the OTSR header and the PMCr magic indicator
 			System.out.println("N: " + ret.length);
 			System.out.println("OFFSET: " + fileOffset);
 			System.out.println("LENGTH: " + fileLength);
 			fis.read(ret, fileOffset, fileLength - fileOffset);
 			fis.close();
+			dump(ret);
 			return ret;
 		}
 		
 		public String toString() {
 			return name;
+		}
+		
+		private void dump(byte[] bytes) {
+			try {
+				File file = new File("./run/" + name + ".dump");
+				if(!file.exists()) {
+					file.getParentFile().mkdirs();
+					file.createNewFile();
+				}
+				FileOutputStream fos = new FileOutputStream(file);
+				fos.write(bytes);
+				fos.close();
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	}
