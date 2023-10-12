@@ -37,6 +37,7 @@ public class DecompressTest {
 			try(FileOutputStream fos = new FileOutputStream(file)) {
 				fos.write(out.array());
 			}
+
 			break;
 		}
 		

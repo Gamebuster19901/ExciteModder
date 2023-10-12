@@ -260,11 +260,12 @@ public class TOCFile implements Checked {
 			final byte[] ret = new byte[fileLength];
 			final File bundle = TOCFile.this.getResourceBundle();
 			FileInputStream fis = new FileInputStream(bundle);
-			fis.skip(0x84); //skip the OTSR header and the PMCr magic indicator
+			fis.skip(0x99); //skip the OTSR header and the compressed data header
 			System.out.println("N: " + ret.length);
 			System.out.println("OFFSET: " + fileOffset);
 			System.out.println("LENGTH: " + fileLength);
-			fis.read(ret, fileOffset, fileLength - fileOffset);
+			//fis.skip(fileOffset);
+			fis.read(ret, 0, fileLength);
 			fis.close();
 			dump(ret);
 			return ret;
