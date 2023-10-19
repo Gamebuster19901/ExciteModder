@@ -8,3 +8,9 @@
  */
 
 rootProject.name = 'ExciteModder'
+
+sourceControl {
+	gitRepository('https://github.com/TheGameCommunity/excite.git') {
+		producesModule('com.thegamecommunity:excite')
+	}
+}
