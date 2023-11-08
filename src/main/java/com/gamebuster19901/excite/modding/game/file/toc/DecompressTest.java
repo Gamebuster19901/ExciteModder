@@ -1,7 +1,6 @@
 package com.gamebuster19901.excite.modding.game.file.toc;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -12,19 +11,47 @@ import com.gamebuster19901.excite.modding.game.file.toc.TOCFile.Resource;
 
 public class DecompressTest {
 	
-	public static void main(String[] args) throws IOException {
-		TOCFile toc = new TOCFile(new File("./gameData/Bat.toc"));
-		RESArchive archive = new RESArchive(toc);
-		archive.check();
+	public static void main(String[] args) throws IOException, InterruptedException {
+		int gameDataCount = 0;
+		int messageCount = 0;
 		
-		System.out.println("Extracting " + toc + "...");
+		int gameDataSuccess = 0;
+		int messageDataSuccess = 0;
+		int gameDataFail = 0;
+		int messageDataFail = 0;
 		
-		LinkedHashSet<Resource> resources = toc.getResources();
-		LinkedHashMap<Resource, ByteBuffer> resourceData;
+			try {
+				gameDataCount++;
+				TOCFile toc = new TOCFile(new File("./gameData/mitch9_test_opt1.toc"));
+				RESArchive archive = new RESArchive(toc);
+				archive.check();
+				
+				System.out.println("Extracting " + toc + "...");
+				
+				LinkedHashSet<Resource> resources = toc.getResources();
+				LinkedHashMap<Resource, ByteBuffer> resourceData;
+				
+				System.out.println("There are " + resources.size() + " resources in " + resources);
+				Thread.sleep(1000);
+				System.out.println("Decompressing " + archive);
+				
+				ByteBuffer in = ByteBuffer.wrap(archive.getCompressedBytes()).order(ByteOrder.LITTLE_ENDIAN);
+				System.err.println(in.capacity());
+				ByteBuffer out = ByteBuffer.allocate(archive.getUncompressedLength());
+				
+				System.out.println("COMPRESSED SIZE: " + archive.getCompressedLength() + " BYTES");
+				System.out.println("UNCOMPRESSED SIZE: " + archive.getUncompressedLength() + " BYTES");
+				MGRLC.decompress(in, out);
+				gameDataSuccess++;
+			}
+			catch(Throwable t) {
+				t.printStackTrace();
+				gameDataFail++;
+			}
+		}
 		
-		System.out.println("There are " + resources.size() + " resources in " + resources);
 		
-		for(Resource resource : resources) {
+		/*for(Resource resource : resources) {
 			ByteBuffer in = ByteBuffer.wrap(resource.toResourceBytes());
 			in.order(ByteOrder.LITTLE_ENDIAN);
 			ByteBuffer out = ByteBuffer.allocate(resource.fileLength);
@@ -39,8 +66,6 @@ public class DecompressTest {
 			}
 
 			break;
-		}
-		
-	}
+		}*/
 	
 }

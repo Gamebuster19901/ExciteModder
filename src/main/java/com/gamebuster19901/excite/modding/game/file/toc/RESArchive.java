@@ -1,6 +1,8 @@
 package com.gamebuster19901.excite.modding.game.file.toc;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -102,6 +104,9 @@ public class RESArchive implements Checked {
 			try {
 				assert(compressedLength + tocOffset <= archiveLength);
 				System.out.println("PASSED compressedLength + tocOffset assertion: (" + archiveLength + ")");
+				System.out.println("\tCompressed Length: " + Integer.toHexString(compressedLength));
+				System.out.println("\tUncompressed Length: " + Integer.toHexString(uncompressedLength));
+				System.out.println("\tArchive Length: " + Integer.toHexString(archiveLength));
 			}
 			catch(AssertionError e) {
 				System.out.println("FAILED compressedLength + fileDataOffset assertion: Expected " + Integer.toHexString(compressedLength + tocOffset) + ", got " + Integer.toHexString(archiveLength));
@@ -140,6 +145,51 @@ public class RESArchive implements Checked {
 	
 	public int getResourceCount() {
 		return fileCount;
+	}
+	
+	public int getCompressedLength() {
+		return compressedLength;
+	}
+	
+	public int getUncompressedLength() {
+		return uncompressedLength;
+	}
+	
+	public byte[] getCompressedBytes() throws IOException {
+		final byte[] ret = new byte[compressedLength];
+		System.err.println(compressedLength);
+		FileInputStream fis = new FileInputStream(toc.getResourceBundle());
+		fis.skip(0x80); //skip the OTSR header
+		fis.read(ret);
+		fis.close();
+		dump(ret, "compressed");
+		return ret;
+	}
+	
+	private void dump(byte[] bytes) {
+		dump(bytes, null);
+	}
+	
+	private void dump(byte[] bytes , String suffix) {
+		if(suffix == null) {
+			suffix = "";
+		}
+		if(!suffix.isEmpty()) {
+			suffix = "." + suffix;
+		}
+		try {
+			File file = new File("./run/" + toc + suffix + ".dump");
+			if(!file.exists()) {
+				file.getParentFile().mkdirs();
+				file.createNewFile();
+			}
+			FileOutputStream fos = new FileOutputStream(file);
+			fos.write(bytes);
+			fos.close();
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

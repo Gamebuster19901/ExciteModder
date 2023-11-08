@@ -20,4 +20,5 @@ repositories {
 
 dependencies {
 	shadow group: 'com.thegamecommunity', name:'excite', version: '0.1.0.0'
+	shadow group: 'com.google.guava', name: 'guava', version:'21.0'
 }
