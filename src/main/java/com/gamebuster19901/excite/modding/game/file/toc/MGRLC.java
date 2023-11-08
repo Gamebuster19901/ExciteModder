@@ -35,20 +35,20 @@ public class MGRLC { //Monster Games Run-Length Compression
 						switch(indicator) {
 							case 0b00:
 								System.out.println("CASE 0");
-								seekback = compressed.get() >> 2;
+								seekback = compressed.get() >>> 2;
 								toRead = 3;
 								break;
 							case 0b01:
 								System.out.println("CASE 1");
-								seekback = compressed.getShort() >> 2;
+								seekback = compressed.getShort() >>> 2;
 								toRead = 3;
 								break;
 							case 0b10:
 								{
 									System.out.println("CASE 10");
 									short read = compressed.getShort();
-									seekback = read >> 6;
-									toRead = (((read & 0b111100) >> 2) + 3);
+									seekback = read >>> 6;
+									toRead = (((read & 0b111100) >>> 2) + 3);
 								}
 								break;
 							case 0b11:
@@ -63,14 +63,14 @@ public class MGRLC { //Monster Games Run-Length Compression
 										System.out.println("24 BIT VALUE: " + binDebug(read));
 										seekback = read >>> 7;
 										System.out.println("SEEKBACK: " + binDebug(seekback));
-										toRead = ((read & 0b1111100) >> 2) + 2; //RShift 8 is due to being 24 bits;
+										toRead = ((read & 0b1111100) >>> 2) + 2; //RShift 8 is due to being 24 bits;
 										System.out.println("TO READ: " + binDebug(toRead));
 										compressed.position(compressed.position() - 1); //go back one byte to be at the same place as if we only read 24 bits instead of 32
 									}
 									else { //value is 32 bit
 										System.out.println("VALUE IS 32 BIT");
-										seekback = read >> 15;
-										toRead = (((read >> 7) & 0b11111111) + 3);
+										seekback = read >>> 15;
+										toRead = (((read >>> 7) & 0b11111111) + 3);
 									}
 								}
 								break;
@@ -87,7 +87,7 @@ public class MGRLC { //Monster Games Run-Length Compression
 						decompressed.position(mark); //reset position to last mark
 					}
 					else {
-						throw new AssertionError("bit should be 0 or 1, got " + ((header >> i) & 1) + ". Buffer position: " + compressed.position() + ", bit " + i + ".");
+						throw new AssertionError("bit should be 0 or 1, got " + ((header >>> i) & 1) + ". Buffer position: " + compressed.position() + ", bit " + i + ".");
 					}
 				}
 			}
