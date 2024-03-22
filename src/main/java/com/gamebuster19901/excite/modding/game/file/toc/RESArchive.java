@@ -1,6 +1,7 @@
 package com.gamebuster19901.excite.modding.game.file.toc;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -140,6 +141,17 @@ public class RESArchive implements Checked {
 	
 	public int getResourceCount() {
 		return fileCount;
+	}
+	
+	public byte[] toResourceBytes() throws IOException {
+		final byte[] ret = new byte[uncompressedLength];
+		final File bundle = resourceFile;
+		FileInputStream fis = new FileInputStream(bundle);
+		fis.skip(0xFF); //skip the OTSR header
+		System.out.println("N: " + ret.length);
+		fis.read(ret, 0, uncompressedLength);
+		fis.close();
+		return ret;
 	}
 	
 }

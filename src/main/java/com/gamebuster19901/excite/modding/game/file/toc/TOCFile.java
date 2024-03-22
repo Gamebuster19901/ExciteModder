@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.UUID;
 
@@ -65,7 +66,8 @@ public class TOCFile implements Checked {
 		this.unknown2 = buf.getInt();
 		this.date = buf.getInt();
 		this.fileCount = buf.getInt();
-		this.resourceFileLength = buf.getLong();
+		this.resourceFileLength = buf.getInt();
+		buf.getInt(); //??
 		this.unknown3 = buf.getInt();
 		this.fileNameDirLength = buf.getInt();
 		
@@ -126,6 +128,10 @@ public class TOCFile implements Checked {
 			}
 		}
 		return null;
+	}
+	
+	public byte[] getResourceBytes() {
+		return Arrays.copyOf(fileData, fileData.length);
 	}
 	
 	public LinkedHashSet<Resource> getResources() {
@@ -257,18 +263,26 @@ public class TOCFile implements Checked {
 		}
 		
 		public byte[] toResourceBytes() throws IOException {
-			final byte[] ret = new byte[fileLength];
-			final File bundle = TOCFile.this.getResourceBundle();
-			FileInputStream fis = new FileInputStream(bundle);
-			fis.skip(0x99); //skip the OTSR header and the compressed data header
-			System.out.println("N: " + ret.length);
-			System.out.println("OFFSET: " + fileOffset);
-			System.out.println("LENGTH: " + fileLength);
-			//fis.skip(fileOffset);
-			fis.read(ret, 0, fileLength);
-			fis.close();
-			dump(ret);
-			return ret;
+			try {
+				final byte[] ret = new byte[fileLength];
+				final File bundle = TOCFile.this.getResourceBundle();
+				final RESArchive archive = TOCFile.this.resourceArchive;
+				
+				ByteBuffer buf = ByteBuffer.wrap(archive.toResourceBytes());
+				System.out.println("N: " + ret.length);
+				System.out.println("OFFSET: " + (fileOffset - 127));
+				System.out.println("LENGTH: " + fileLength);
+				System.out.println("WANT TO ACCESS POSITION " + (fileOffset + fileLength));
+				System.out.println("ARCHIVE SIZE: " + archive.toResourceBytes().length);
+				buf.position(fileOffset - 127);
+				buf.get(ret);
+				dump(ret);
+				return ret;
+			}
+			catch(Throwable t) {
+				System.out.println("Exception when extracting " + name);
+				throw new IOException(t);
+			}
 		}
 		
 		public String toString() {

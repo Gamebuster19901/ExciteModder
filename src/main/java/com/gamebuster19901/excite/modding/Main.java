@@ -46,11 +46,12 @@ public class Main {
 		try {
 			int badTocs = 0;
 			
-			File[] gameFiles = GAME_FILES.listFiles();
+			//File[] gameFiles = GAME_FILES.listFiles();
+			File[] gameFiles = new File[] {GAME_FILES.toPath().resolve("Turtle.toc").toFile()};
 			if(gameFiles.length == 0) {
 				throw new IllegalStateException("No .toc files detected!");
 			}
-			for(File f : GAME_FILES.listFiles()) {
+			for(File f : gameFiles) {
 				if(f.getPath().endsWith(".toc")) {
 					try {
 						tocs.add(new TOCFile(f));
