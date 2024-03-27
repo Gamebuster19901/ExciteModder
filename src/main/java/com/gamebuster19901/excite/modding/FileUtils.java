@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class FileUtils {
 
@@ -36,6 +40,39 @@ public class FileUtils {
 			str[i] = buffer.get();
 		}
 		return new String(str, charset);
+	}
+	
+	public static void deleteRecursively(Path path) throws IOException {	
+		if (Files.exists(path)) {
+			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					Files.delete(file);
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					if (Files.isSymbolicLink(dir)) {
+						Files.delete(dir);
+						return FileVisitResult.SKIP_SUBTREE;
+					}
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+					if (exc == null) {
+						Files.delete(dir);
+						return FileVisitResult.CONTINUE;
+					} else {
+						throw exc;
+					}
+				}
+			});
+		} else {
+			System.out.println("The specified path does not exist: " + path);
+		}
 	}
 	
 }
