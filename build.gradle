@@ -8,6 +8,8 @@ plugins {
 sourceCompatibility = '21'
 targetCompatibility = '21'
 
+sourceSets.main.java.srcDirs += 'build/generated/kaitai'
+
 repositories {
 	mavenLocal()
 	mavenCentral()
@@ -29,7 +31,55 @@ dependencies {
 	shadow group: 'io.kaitai', name: 'kaitai-struct-runtime', version: '0.10'
 }
 
+
+tasks.eclipse {
+	dependsOn 'init'
+}
+tasks.init {
+	finalizedBy 'kaitai'
+}
+
+tasks.kaitai.doFirst {
+	deleteRecursively(output.toPath());
+}
 kaitai {
 	url = new URL('https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.10/kaitai-struct-compiler-0.10.zip')
-	packageName = 'com.gamebuster19901.excite.modding.kaitai'
+	packageName = 'com.gamebuster19901.excite.modding.game.file.kaitai'
+	System.out.println('Compiling kaitai sources...')
+	System.out.println('OUTPUT: ' + output)
+	System.out.println('SOURCE: ' + sourceDirectory)
+}
+
+import java.nio.file.*
+import java.nio.file.attribute.*
+
+public static void deleteRecursively(Path path) throws IOException {	
+	if (Files.exists(path)) {
+		System.out.println("Deleting " + path);
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+				if (Files.isSymbolicLink(dir)) { //We MUST skip symbolic links or unintended files will be deleted!
+					Files.delete(dir);
+					return FileVisitResult.SKIP_SUBTREE;
+				}
+				return FileVisitResult.CONTINUE;
+			}
+
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				if (exc == null) {
+					Files.delete(dir);
+					return FileVisitResult.CONTINUE;
+				} else {
+					throw exc;
+				}
+			}
+		});
+	} else {
+		System.out.println("The specified path does not exist: " + path);
+	}
 }
