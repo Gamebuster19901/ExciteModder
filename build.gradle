@@ -30,6 +30,6 @@ dependencies {
 }
 
 kaitai {
-	url = new URL('https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.8/kaitai-struct-compiler-0.8.zip')
+	url = new URL('https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.10/kaitai-struct-compiler-0.10.zip')
 	packageName = 'com.gamebuster19901.excite.modding.kaitai'
 }
