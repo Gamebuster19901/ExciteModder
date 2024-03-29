@@ -28,6 +28,11 @@ dependencies {
 			branch = 'develop-extract'
 		}
 	}
+	implementation('com.thegamecommunity:excite') {
+		version {
+			branch = 'develop-extract'
+		}
+	}
 	shadow group: 'org.apache.commons', name: 'commons-text', version: '1.11.0'
 	shadow group: 'io.kaitai', name: 'kaitai-struct-runtime', version: '0.10'
 }
