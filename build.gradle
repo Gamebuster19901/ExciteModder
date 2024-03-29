@@ -11,6 +11,7 @@ targetCompatibility = '21'
 
 sourceSets.main.java.srcDirs += 'build/generated/kaitai'
 
+
 repositories {
 	mavenLocal()
 	mavenCentral()
@@ -35,6 +36,9 @@ dependencies {
 	}
 	shadow group: 'org.apache.commons', name: 'commons-text', version: '1.11.0'
 	shadow group: 'io.kaitai', name: 'kaitai-struct-runtime', version: '0.10'
+	
+	testImplementation group: 'org.junit.jupiter', name:'junit-jupiter-api', version: '5.10.2'
+	testRuntimeOnly group: 'org.junit.jupiter', name :'junit-jupiter-engine', version: '5.10.2'
 }
 
 
