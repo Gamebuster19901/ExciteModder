@@ -51,9 +51,6 @@ tasks.kaitai.doFirst {
 kaitai {
 	url = new URL('https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.10/kaitai-struct-compiler-0.10.zip')
 	packageName = 'com.gamebuster19901.excite.modding.game.file.kaitai'
-	System.out.println('Compiling kaitai sources...')
-	System.out.println('OUTPUT: ' + output)
-	System.out.println('SOURCE: ' + sourceDirectory)
 }
 
 import java.nio.file.*
