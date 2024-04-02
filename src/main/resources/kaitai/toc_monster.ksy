@@ -14,6 +14,8 @@ seq:
     type: filename
     repeat: expr
     repeat-expr: header.num_file
+  - id: padding
+    type: padding
 types:
   header:
     seq:
@@ -74,3 +76,8 @@ types:
         type: str
         encoding: utf-8
         terminator: 0
+  padding:
+    seq:
+      - id: padding
+        type: u1
+        repeat: eos

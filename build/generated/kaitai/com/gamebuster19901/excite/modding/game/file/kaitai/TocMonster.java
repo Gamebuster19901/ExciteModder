@@ -1,6 +1,6 @@
 // This is a generated file! Please edit source .ksy file and use kaitai-struct-compiler to rebuild
 
-package com.gamebuster19901.excite.modding.kaitai;
+package com.gamebuster19901.excite.modding.game.file.kaitai;
 
 import io.kaitai.struct.ByteBufferKaitaiStream;
 import io.kaitai.struct.KaitaiStruct;
@@ -39,6 +39,7 @@ public class TocMonster extends KaitaiStruct {
         for (int i = 0; i < header().numFile(); i++) {
             this.filename.add(new Filename(this._io, this, _root));
         }
+        this.padding = new Padding(this._io, this, _root);
     }
     public static class Header extends KaitaiStruct {
         public static Header fromFile(String fileName) throws IOException {
@@ -207,14 +208,52 @@ public class TocMonster extends KaitaiStruct {
         public TocMonster _root() { return _root; }
         public TocMonster _parent() { return _parent; }
     }
+    public static class Padding extends KaitaiStruct {
+        public static Padding fromFile(String fileName) throws IOException {
+            return new Padding(new ByteBufferKaitaiStream(fileName));
+        }
+
+        public Padding(KaitaiStream _io) {
+            this(_io, null, null);
+        }
+
+        public Padding(KaitaiStream _io, TocMonster _parent) {
+            this(_io, _parent, null);
+        }
+
+        public Padding(KaitaiStream _io, TocMonster _parent, TocMonster _root) {
+            super(_io);
+            this._parent = _parent;
+            this._root = _root;
+            _read();
+        }
+        private void _read() {
+            this.padding = new ArrayList<Integer>();
+            {
+                int i = 0;
+                while (!this._io.isEof()) {
+                    this.padding.add(this._io.readU1());
+                    i++;
+                }
+            }
+        }
+        private ArrayList<Integer> padding;
+        private TocMonster _root;
+        private TocMonster _parent;
+        public ArrayList<Integer> padding() { return padding; }
+        public TocMonster _root() { return _root; }
+        public TocMonster _parent() { return _parent; }
+    }
     private Header header;
     private ArrayList<Details> details;
     private ArrayList<Filename> filename;
+    private Padding padding;
     private TocMonster _root;
     private KaitaiStruct _parent;
     public Header header() { return header; }
     public ArrayList<Details> details() { return details; }
     public ArrayList<Filename> filename() { return filename; }
+    public Padding padding() { return padding; }
     public TocMonster _root() { return _root; }
     public KaitaiStruct _parent() { return _parent; }
 }

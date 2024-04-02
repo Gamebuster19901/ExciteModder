@@ -52,3 +52,11 @@ types:
         type: u1
         repeat: expr
         repeat-expr: 64
+      - id: compressed_data
+        type: u1
+        repeat: eos
+        if: compressed == 128
+      - id: uncompressed_data
+        type: u1
+        repeat: eos
+        if: compressed == 0
