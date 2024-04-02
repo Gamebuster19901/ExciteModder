@@ -10,12 +10,6 @@ seq:
     type: details
     repeat: expr
     repeat-expr: header.num_file
-  - id: filename
-    type: filename
-    repeat: expr
-    repeat-expr: header.num_file
-  - id: padding
-    type: padding
 types:
   header:
     seq:
@@ -70,14 +64,10 @@ types:
         type: u1
         repeat: expr
         repeat-expr: 16
-  filename:
-    seq:
-      - id: filename
+    instances:
+      name:
+        pos: ((_parent.header.num_file + 1) * 40) + 0xc + offset_filename
         type: str
         encoding: utf-8
         terminator: 0
-  padding:
-    seq:
-      - id: padding
-        type: u1
-        repeat: eos
+        include: false
