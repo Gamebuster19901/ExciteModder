@@ -35,6 +35,10 @@ public class TocMonster extends KaitaiStruct {
         for (int i = 0; i < header().numFile(); i++) {
             this.details.add(new Details(this._io, this, _root));
         }
+        this.filenames = new ArrayList<Filenames>();
+        for (int i = 0; i < header().numFile(); i++) {
+            this.filenames.add(new Filenames(this._io, this, _root));
+        }
     }
     public static class Header extends KaitaiStruct {
         public static Header fromFile(String fileName) throws IOException {
@@ -184,12 +188,43 @@ public class TocMonster extends KaitaiStruct {
         public TocMonster _root() { return _root; }
         public TocMonster _parent() { return _parent; }
     }
+    public static class Filenames extends KaitaiStruct {
+        public static Filenames fromFile(String fileName) throws IOException {
+            return new Filenames(new ByteBufferKaitaiStream(fileName));
+        }
+
+        public Filenames(KaitaiStream _io) {
+            this(_io, null, null);
+        }
+
+        public Filenames(KaitaiStream _io, TocMonster _parent) {
+            this(_io, _parent, null);
+        }
+
+        public Filenames(KaitaiStream _io, TocMonster _parent, TocMonster _root) {
+            super(_io);
+            this._parent = _parent;
+            this._root = _root;
+            _read();
+        }
+        private void _read() {
+            this.filename = new String(this._io.readBytesTerm((byte) 0, false, true, true), Charset.forName("utf-8"));
+        }
+        private String filename;
+        private TocMonster _root;
+        private TocMonster _parent;
+        public String filename() { return filename; }
+        public TocMonster _root() { return _root; }
+        public TocMonster _parent() { return _parent; }
+    }
     private Header header;
     private ArrayList<Details> details;
+    private ArrayList<Filenames> filenames;
     private TocMonster _root;
     private KaitaiStruct _parent;
     public Header header() { return header; }
     public ArrayList<Details> details() { return details; }
+    public ArrayList<Filenames> filenames() { return filenames; }
     public TocMonster _root() { return _root; }
     public KaitaiStruct _parent() { return _parent; }
 }

@@ -10,6 +10,10 @@ seq:
     type: details
     repeat: expr
     repeat-expr: header.num_file
+  - id: filenames
+    type: filenames
+    repeat: expr
+    repeat-expr: header.num_file
 types:
   header:
     seq:
@@ -71,3 +75,9 @@ types:
         encoding: utf-8
         terminator: 0
         include: false
+  filenames:
+    seq:
+      - id: filename
+        type: str
+        encoding: utf-8
+        terminator: 0
