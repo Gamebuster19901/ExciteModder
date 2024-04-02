@@ -1,6 +1,7 @@
 package com.gamebuster19901.excite.modding;
 
 import java.io.File;
+import java.io.IOError;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -8,11 +9,30 @@ import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class FileUtils {
 
+	public static final Path TEMP;
+	static {
+		try {
+			TEMP = Files.createTempDirectory(Paths.get("./run/tmp").toAbsolutePath(), null);
+		} catch (IOException e) {
+			throw new IOError(e);
+		}
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			if(Files.exists(TEMP)) {
+				try {
+					deleteRecursively(TEMP);
+				} catch (IOException e) {
+					e.printStackTrace(); //nothing we can do, so just print
+				}
+			}
+		}));
+	}
+	
 	public static ByteBuffer getByteBuffer(File file, ByteOrder order) throws IOException {
 		return ByteBuffer.wrap(Files.readAllBytes(file.toPath())).asReadOnlyBuffer().order(order);
 	}
@@ -40,6 +60,10 @@ public class FileUtils {
 			str[i] = buffer.get();
 		}
 		return new String(str, charset);
+	}
+	
+	public static Path createTempFile() throws IOException {
+		return Files.createTempFile(TEMP, null, null);
 	}
 	
 	public static void deleteRecursively(Path path) throws IOException {	
