@@ -3,9 +3,12 @@ meta:
   file-extension: res
   title: Monster Game Resource
   endian: le
+  imports: quicklz_rcmp
 seq:
   - id: header
     type: header
+  - id: data
+    type: quicklz_rcmp
 types:
   header:
     seq:
@@ -52,11 +55,11 @@ types:
         type: u1
         repeat: expr
         repeat-expr: 64
-      - id: compressed_data
-        type: u1
-        repeat: eos
-        if: compressed == 128
-      - id: uncompressed_data
-        type: u1
-        repeat: eos
-        if: compressed == 0
+  data:
+    seq:
+      - id: data
+        type:
+          switch-on: _root.header.compressed
+          cases:
+            128: quicklz_rcmp
+            0: u1

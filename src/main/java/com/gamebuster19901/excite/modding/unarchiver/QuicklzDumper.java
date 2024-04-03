@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import com.gamebuster19901.excite.modding.FileUtils;
+
 public class QuicklzDumper {
 	
 	public static final Path TEMP;
@@ -23,8 +25,8 @@ public class QuicklzDumper {
 	
 	{
 		try {
-			input = Files.createTempFile(TEMP, null, null);
-			output = Files.createTempFile(TEMP, null, null);
+			input = FileUtils.createTempFile();
+			output = FileUtils.createTempFile();
 		}
 		catch(IOException e) {
 			throw new IOError(e);

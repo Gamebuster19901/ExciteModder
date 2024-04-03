@@ -30,6 +30,7 @@ public class ResMonster extends KaitaiStruct {
     }
     private void _read() {
         this.header = new Header(this._io, this, _root);
+        this.data = new QuicklzRcmp(this._io);
     }
     public static class Header extends KaitaiStruct {
         public static Header fromFile(String fileName) throws IOException {
@@ -78,26 +79,6 @@ public class ResMonster extends KaitaiStruct {
             for (int i = 0; i < 64; i++) {
                 this.unknown5.add(this._io.readU1());
             }
-            if (compressed() == 128) {
-                this.compressedData = new ArrayList<Integer>();
-                {
-                    int i = 0;
-                    while (!this._io.isEof()) {
-                        this.compressedData.add(this._io.readU1());
-                        i++;
-                    }
-                }
-            }
-            if (compressed() == 0) {
-                this.uncompressedData = new ArrayList<Integer>();
-                {
-                    int i = 0;
-                    while (!this._io.isEof()) {
-                        this.uncompressedData.add(this._io.readU1());
-                        i++;
-                    }
-                }
-            }
         }
         private byte[] magic1;
         private long sizeHeader;
@@ -116,8 +97,6 @@ public class ResMonster extends KaitaiStruct {
         private long unknown4;
         private long hash;
         private ArrayList<Integer> unknown5;
-        private ArrayList<Integer> compressedData;
-        private ArrayList<Integer> uncompressedData;
         private ResMonster _root;
         private ResMonster _parent;
         public byte[] magic1() { return magic1; }
@@ -153,15 +132,53 @@ public class ResMonster extends KaitaiStruct {
         public long unknown4() { return unknown4; }
         public long hash() { return hash; }
         public ArrayList<Integer> unknown5() { return unknown5; }
-        public ArrayList<Integer> compressedData() { return compressedData; }
-        public ArrayList<Integer> uncompressedData() { return uncompressedData; }
         public ResMonster _root() { return _root; }
         public ResMonster _parent() { return _parent; }
     }
+    public static class Data extends KaitaiStruct {
+        public static Data fromFile(String fileName) throws IOException {
+            return new Data(new ByteBufferKaitaiStream(fileName));
+        }
+
+        public Data(KaitaiStream _io) {
+            this(_io, null, null);
+        }
+
+        public Data(KaitaiStream _io, KaitaiStruct _parent) {
+            this(_io, _parent, null);
+        }
+
+        public Data(KaitaiStream _io, KaitaiStruct _parent, ResMonster _root) {
+            super(_io);
+            this._parent = _parent;
+            this._root = _root;
+            _read();
+        }
+        private void _read() {
+            switch (_root().header().compressed()) {
+            case 128: {
+                this.data = new QuicklzRcmp(this._io);
+                break;
+            }
+            case 0: {
+                this.data = (Object) (this._io.readU1());
+                break;
+            }
+            }
+        }
+        private Object data;
+        private ResMonster _root;
+        private KaitaiStruct _parent;
+        public Object data() { return data; }
+        public ResMonster _root() { return _root; }
+        public KaitaiStruct _parent() { return _parent; }
+    }
     private Header header;
+    private QuicklzRcmp data;
     private ResMonster _root;
     private KaitaiStruct _parent;
     public Header header() { return header; }
+    public QuicklzRcmp data() { return data; }
     public ResMonster _root() { return _root; }
     public KaitaiStruct _parent() { return _parent; }
 }

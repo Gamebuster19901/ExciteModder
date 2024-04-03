@@ -1,5 +1,5 @@
 meta:
-  id: quicklz
+  id: quicklz_rcmp
   title: quickLZ compressed data
   endian: le
 seq:

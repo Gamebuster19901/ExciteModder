@@ -3,6 +3,8 @@ package com.gamebuster19901.excite.modding;
 import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
@@ -67,10 +69,17 @@ public class FileUtils {
 	}
 	
 	public static void deleteRecursively(Path path) throws IOException {	
+		deleteRecursively(path, null);
+	}
+	
+	public static void deleteRecursively(Path path, PrintStream o) throws IOException {	
 		if (Files.exists(path)) {
 			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					if(o != null) {
+						o.println("Deleting file: " + file.toAbsolutePath());
+					}
 					Files.delete(file);
 					return FileVisitResult.CONTINUE;
 				}
@@ -78,6 +87,9 @@ public class FileUtils {
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 					if (Files.isSymbolicLink(dir)) {
+						if(o != null) {
+							o.println("Deleting symbolic link: " + dir.toAbsolutePath());
+						}
 						Files.delete(dir);
 						return FileVisitResult.SKIP_SUBTREE;
 					}
@@ -87,6 +99,9 @@ public class FileUtils {
 				@Override
 				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 					if (exc == null) {
+						if(o != null) {
+							o.println("Deleting directory: " + dir.toAbsolutePath());
+						}
 						Files.delete(dir);
 						return FileVisitResult.CONTINUE;
 					} else {
