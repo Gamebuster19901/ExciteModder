@@ -3,6 +3,8 @@ package com.gamebuster19901.excite.modding.unarchiver;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import com.gamebuster19901.excite.modding.game.file.kaitai.TocMonster;
+
 public class Main {
 
 	public static void main(String[] args) throws IOException {
@@ -13,6 +15,9 @@ public class Main {
 			System.out.println("Unarchiving " + toc);
 			unarchiver.unarchive(toc);
 		}
+		
+		TocMonster a;
+		
 	}
 	
 }

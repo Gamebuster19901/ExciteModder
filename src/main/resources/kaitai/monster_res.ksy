@@ -8,7 +8,7 @@ seq:
   - id: header
     type: header
   - id: data
-    type: quicklz_rcmp
+    type: data
 types:
   header:
     seq:
@@ -57,9 +57,9 @@ types:
         repeat-expr: 64
   data:
     seq:
-      - id: data
-        type:
-          switch-on: _root.header.compressed
-          cases:
-            128: quicklz_rcmp
-            0: u1
+      - id: compressed_data
+        type: quicklz_rcmp
+        if: _root.header.compressed == 128
+      - id: uncompressed_data
+        size-eos: true
+        if: _root.header.compressed == 0

@@ -5,7 +5,7 @@ meta:
 seq:
   - id: header
     type: header
-  - id: data
+  - id: bytes
     size-eos: true
     process: com.gamebuster19901.excite.modding.unarchiver.quicklz_dumper
 types:
