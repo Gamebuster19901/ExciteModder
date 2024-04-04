@@ -4,21 +4,12 @@ import java.io.IOException;
 import java.io.IOError;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.concurrent.TimeUnit;
 
 import com.gamebuster19901.excite.modding.FileUtils;
 
 public class QuicklzDumper {
-	
-	public static final Path TEMP;
-	static {
-		try {
-			TEMP = Files.createTempDirectory(Paths.get("./run/tmp").toAbsolutePath(), null);
-		} catch (IOException e) {
-			throw new IOError(e);
-		}
-	}
 	
 	private final Path input;
 	private final Path output;
@@ -36,10 +27,11 @@ public class QuicklzDumper {
 	public byte[] decode(byte[] _raw_data) {
 		try {
 			Files.write(input, _raw_data, StandardOpenOption.CREATE);
-			QuickLZ.decompress(input, output);
+			Process process = QuickLZ.decompress(input, output);
+			process.waitFor(5000, TimeUnit.SECONDS);
 			return Files.readAllBytes(output);
 		}
-		catch(IOException e) {
+		catch(IOException | InterruptedException e) {
 			throw new IOError(e);
 		}
 	}

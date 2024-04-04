@@ -63,12 +63,14 @@ public class Archive implements ResourceFile {
 
 	@Override
 	public ByteBuffer getHeaderBytes() throws IOException {
-		return this.getResourceBytes().slice(0, 0x40);
+		return this.getRawBytes().slice(0, 0x40);
 	}
 
 	@Override
 	public boolean isCompressedArchive() throws IOException {
-		return this.getHeaderBytes().position(44).getInt() != 0;
+		int compress = this.getHeaderBytes().position(44).getInt();
+		System.out.println("compress: " + compress) ;
+		return compress != 0;
 	}
 	
 	public final Path getStrippedDest() throws IOException {

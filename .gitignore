@@ -31,4 +31,3 @@ hs_err_pid*.log
 gameData/
 out.txt
 run:log.txt
-/build/

@@ -30,7 +30,7 @@ public class ResMonster extends KaitaiStruct {
     }
     private void _read() {
         this.header = new Header(this._io, this, _root);
-        this.data = new QuicklzRcmp(this._io);
+        this.data = new Data(this._io, this, _root);
     }
     public static class Header extends KaitaiStruct {
         public static Header fromFile(String fileName) throws IOException {
@@ -144,41 +144,39 @@ public class ResMonster extends KaitaiStruct {
             this(_io, null, null);
         }
 
-        public Data(KaitaiStream _io, KaitaiStruct _parent) {
+        public Data(KaitaiStream _io, ResMonster _parent) {
             this(_io, _parent, null);
         }
 
-        public Data(KaitaiStream _io, KaitaiStruct _parent, ResMonster _root) {
+        public Data(KaitaiStream _io, ResMonster _parent, ResMonster _root) {
             super(_io);
             this._parent = _parent;
             this._root = _root;
             _read();
         }
         private void _read() {
-            switch (_root().header().compressed()) {
-            case 128: {
-                this.data = new QuicklzRcmp(this._io);
-                break;
+            if (_root().header().compressed() == 128) {
+                this.compressedData = new QuicklzRcmp(this._io);
             }
-            case 0: {
-                this.data = (Object) (this._io.readU1());
-                break;
-            }
+            if (_root().header().compressed() == 0) {
+                this.uncompressedData = this._io.readBytesFull();
             }
         }
-        private Object data;
+        private QuicklzRcmp compressedData;
+        private byte[] uncompressedData;
         private ResMonster _root;
-        private KaitaiStruct _parent;
-        public Object data() { return data; }
+        private ResMonster _parent;
+        public QuicklzRcmp compressedData() { return compressedData; }
+        public byte[] uncompressedData() { return uncompressedData; }
         public ResMonster _root() { return _root; }
-        public KaitaiStruct _parent() { return _parent; }
+        public ResMonster _parent() { return _parent; }
     }
     private Header header;
-    private QuicklzRcmp data;
+    private Data data;
     private ResMonster _root;
     private KaitaiStruct _parent;
     public Header header() { return header; }
-    public QuicklzRcmp data() { return data; }
+    public Data data() { return data; }
     public ResMonster _root() { return _root; }
     public KaitaiStruct _parent() { return _parent; }
 }

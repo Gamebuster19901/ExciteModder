@@ -3,7 +3,6 @@ package com.gamebuster19901.excite.modding;
 import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -20,6 +19,7 @@ public class FileUtils {
 	public static final Path TEMP;
 	static {
 		try {
+			Files.createDirectories(Paths.get("./run/tmp"));
 			TEMP = Files.createTempDirectory(Paths.get("./run/tmp").toAbsolutePath(), null);
 		} catch (IOException e) {
 			throw new IOError(e);
@@ -66,6 +66,10 @@ public class FileUtils {
 	
 	public static Path createTempFile() throws IOException {
 		return Files.createTempFile(TEMP, null, null);
+	}
+	
+	public static Path createTempFile(String name) throws IOException {
+		return Files.createTempFile(TEMP, name, null);
 	}
 	
 	public static void deleteRecursively(Path path) throws IOException {	
