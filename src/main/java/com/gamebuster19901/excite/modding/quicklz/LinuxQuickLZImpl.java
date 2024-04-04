@@ -1,8 +1,8 @@
-package com.gamebuster19901.excite.modding.unarchiver;
+package com.gamebuster19901.excite.modding.quicklz;
 
 import java.nio.file.Path;
 
-import com.gamebuster19901.excite.modding.unarchiver.QuickLZ.Mode;
+import com.gamebuster19901.excite.modding.quicklz.QuickLZ.Mode;
 import com.thegamecommunity.excite.modding.util.foreign.c.dependency.ForeignDependencies;
 
 public class LinuxQuickLZImpl implements QuickLZImpl {

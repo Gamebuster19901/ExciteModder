@@ -1,4 +1,4 @@
-package com.gamebuster19901.excite.modding.unarchiver2;
+package com.gamebuster19901.excite.modding.unarchiver;
 
 import java.io.IOException;
 import java.nio.file.Files;

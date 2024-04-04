@@ -30,7 +30,7 @@ public class QuicklzRcmp extends KaitaiStruct {
     private void _read() {
         this.header = new Header(this._io, this, _root);
         this._raw_bytes = this._io.readBytesFull();
-        com.gamebuster19901.excite.modding.unarchiver.QuicklzDumper _process__raw_bytes = new com.gamebuster19901.excite.modding.unarchiver.QuicklzDumper();
+        com.gamebuster19901.excite.modding.quicklz.QuicklzDumper _process__raw_bytes = new com.gamebuster19901.excite.modding.quicklz.QuicklzDumper();
         this.bytes = _process__raw_bytes.decode(_raw_bytes);
     }
     public static class Header extends KaitaiStruct {

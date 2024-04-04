@@ -1,4 +1,4 @@
-package com.gamebuster19901.excite.modding.unarchiver;
+package com.gamebuster19901.excite.modding.quicklz;
 
 import java.nio.file.Path;
 

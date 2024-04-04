@@ -7,7 +7,7 @@ seq:
     type: header
   - id: bytes
     size-eos: true
-    process: com.gamebuster19901.excite.modding.unarchiver.quicklz_dumper
+    process: com.gamebuster19901.excite.modding.quicklz.quicklz_dumper
 types:
   header:
     seq:
