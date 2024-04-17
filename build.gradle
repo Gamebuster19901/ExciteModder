@@ -34,7 +34,7 @@ dependencies {
 			branch = 'develop-extract'
 		}
 	}
-	shadow group: 'org.apache.commons', name: 'commons-text', version: '1.11.0'
+	shadow group: 'org.apache.commons', name: 'commons-text', version: '1.12.0'
 	shadow group: 'io.kaitai', name: 'kaitai-struct-runtime', version: '0.10'
 	
 	testImplementation group: 'org.junit.jupiter', name:'junit-jupiter-api', version: '5.10.2'
