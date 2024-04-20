@@ -28,18 +28,9 @@ import javax.swing.SwingConstants;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import javax.swing.JList;
-import javax.swing.BoxLayout;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
 import java.awt.GridLayout;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.FlowLayout;
 import javax.swing.JTable;
 
 public class Window implements BatchListener, MouseWheelListener {
@@ -154,7 +145,6 @@ public class Window implements BatchListener, MouseWheelListener {
 		
 		JPanel panel = new JPanel();
 		tabbedPane.addTab("Progress", null, panel, null);
-		panel.setLayout(new BorderLayout(0, 0));
 		
 		//gridPanel.setPreferredSize(new Dimension(814, 406));
 				
@@ -169,28 +159,30 @@ public class Window implements BatchListener, MouseWheelListener {
 			}
 			tabbedPane.addTab(c.getName(), null);
 		}
+		panel.setLayout(new GridLayout(0, 2, 0, 0));
 		
 		JPanel panel_1 = new JPanel();
-		panel.add(panel_1, BorderLayout.CENTER);
+		panel.add(panel_1);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[]{0, 0, 70, 90, 0};
+		gbl_panel_1.columnWidths = new int[]{100, 0, 70, 90, 0, 0};
 		gbl_panel_1.rowHeights = new int[]{0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
 		JLabel lblCopyOperation = new JLabel("Copy Operation");
 		GridBagConstraints gbc_lblCopyOperation = new GridBagConstraints();
-		gbc_lblCopyOperation.gridwidth = 4;
-		gbc_lblCopyOperation.insets = new Insets(0, 0, 5, 5);
+		gbc_lblCopyOperation.gridwidth = 5;
+		gbc_lblCopyOperation.insets = new Insets(0, 0, 5, 0);
 		gbc_lblCopyOperation.gridx = 0;
 		gbc_lblCopyOperation.gridy = 0;
 		panel_1.add(lblCopyOperation, gbc_lblCopyOperation);
-		BatchOperationComponent allBatches = new BatchOperationComponent(batchRunner, "          All Batches          ");
+		BatchOperationComponent allBatches = new BatchOperationComponent(batchRunner, "All Batches");
+		allBatches.setToolTipText("All Batches");
 		GridBagConstraints gbc_allBatches = new GridBagConstraints();
-		gbc_allBatches.fill = GridBagConstraints.VERTICAL;
-		gbc_allBatches.gridheight = 9;
-		gbc_allBatches.insets = new Insets(0, 0, 5, 5);
+		gbc_allBatches.fill = GridBagConstraints.BOTH;
+		gbc_allBatches.gridheight = 10;
+		gbc_allBatches.insets = new Insets(0, 0, 0, 5);
 		gbc_allBatches.gridx = 0;
 		gbc_allBatches.gridy = 1;
 		panel_1.add(allBatches, gbc_allBatches);
@@ -216,10 +208,17 @@ public class Window implements BatchListener, MouseWheelListener {
 		JLabel lblTotalArchivesCount = new JLabel("0");
 		GridBagConstraints gbc_lblTotalArchivesCount = new GridBagConstraints();
 		gbc_lblTotalArchivesCount.anchor = GridBagConstraints.WEST;
-		gbc_lblTotalArchivesCount.insets = new Insets(0, 0, 5, 0);
+		gbc_lblTotalArchivesCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTotalArchivesCount.gridx = 3;
 		gbc_lblTotalArchivesCount.gridy = 1;
 		panel_1.add(lblTotalArchivesCount, gbc_lblTotalArchivesCount);
+		
+		JLabel label_5 = new JLabel("100%");
+		GridBagConstraints gbc_label_5 = new GridBagConstraints();
+		gbc_label_5.insets = new Insets(0, 0, 5, 0);
+		gbc_label_5.gridx = 4;
+		gbc_label_5.gridy = 1;
+		panel_1.add(label_5, gbc_label_5);
 		
 		JLabel lblTotalResources = new JLabel("Total Resources:");
 		lblTotalResources.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -233,10 +232,17 @@ public class Window implements BatchListener, MouseWheelListener {
 		JLabel lblTotalResourcesCount = new JLabel("0");
 		GridBagConstraints gbc_lblTotalResourcesCount = new GridBagConstraints();
 		gbc_lblTotalResourcesCount.anchor = GridBagConstraints.WEST;
-		gbc_lblTotalResourcesCount.insets = new Insets(0, 0, 5, 0);
+		gbc_lblTotalResourcesCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTotalResourcesCount.gridx = 3;
 		gbc_lblTotalResourcesCount.gridy = 2;
 		panel_1.add(lblTotalResourcesCount, gbc_lblTotalResourcesCount);
+		
+		JLabel label_6 = new JLabel("100%");
+		GridBagConstraints gbc_label_6 = new GridBagConstraints();
+		gbc_label_6.insets = new Insets(0, 0, 5, 0);
+		gbc_label_6.gridx = 4;
+		gbc_label_6.gridy = 2;
+		panel_1.add(label_6, gbc_label_6);
 		
 		JLabel lblArchivesCopied = new JLabel("Archives Copied:");
 		GridBagConstraints gbc_lblArchivesCopied = new GridBagConstraints();
@@ -246,13 +252,20 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesCopied.gridy = 4;
 		panel_1.add(lblArchivesCopied, gbc_lblArchivesCopied);
 		
-		JLabel label_1 = new JLabel("0 (0%)");
+		JLabel label_1 = new JLabel("99");
 		GridBagConstraints gbc_label_1 = new GridBagConstraints();
 		gbc_label_1.anchor = GridBagConstraints.WEST;
-		gbc_label_1.insets = new Insets(0, 0, 5, 0);
+		gbc_label_1.insets = new Insets(0, 0, 5, 5);
 		gbc_label_1.gridx = 3;
 		gbc_label_1.gridy = 4;
 		panel_1.add(label_1, gbc_label_1);
+		
+		JLabel label_7 = new JLabel("0%");
+		GridBagConstraints gbc_label_7 = new GridBagConstraints();
+		gbc_label_7.insets = new Insets(0, 0, 5, 0);
+		gbc_label_7.gridx = 4;
+		gbc_label_7.gridy = 4;
+		panel_1.add(label_7, gbc_label_7);
 		
 		JLabel lblResourcesCopied = new JLabel("Resources Copied:");
 		GridBagConstraints gbc_lblResourcesCopied = new GridBagConstraints();
@@ -262,30 +275,20 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesCopied.gridy = 5;
 		panel_1.add(lblResourcesCopied, gbc_lblResourcesCopied);
 		
-		JLabel label_2 = new JLabel("0 (0%)");
+		JLabel label_2 = new JLabel("0");
 		GridBagConstraints gbc_label_2 = new GridBagConstraints();
 		gbc_label_2.anchor = GridBagConstraints.WEST;
-		gbc_label_2.insets = new Insets(0, 0, 5, 0);
+		gbc_label_2.insets = new Insets(0, 0, 5, 5);
 		gbc_label_2.gridx = 3;
 		gbc_label_2.gridy = 5;
 		panel_1.add(label_2, gbc_label_2);
 		
-		JLabel lblArchivesProcessed = new JLabel("Archives Processed:");
-		lblArchivesProcessed.setHorizontalAlignment(SwingConstants.RIGHT);
-		GridBagConstraints gbc_lblArchivesProcessed = new GridBagConstraints();
-		gbc_lblArchivesProcessed.anchor = GridBagConstraints.EAST;
-		gbc_lblArchivesProcessed.insets = new Insets(0, 0, 5, 5);
-		gbc_lblArchivesProcessed.gridx = 2;
-		gbc_lblArchivesProcessed.gridy = 7;
-		panel_1.add(lblArchivesProcessed, gbc_lblArchivesProcessed);
-		
-		JLabel lblArchivesprocessed = new JLabel("0 (0%)");
-		GridBagConstraints gbc_lblArchivesprocessed = new GridBagConstraints();
-		gbc_lblArchivesprocessed.insets = new Insets(0, 0, 5, 0);
-		gbc_lblArchivesprocessed.anchor = GridBagConstraints.WEST;
-		gbc_lblArchivesprocessed.gridx = 3;
-		gbc_lblArchivesprocessed.gridy = 7;
-		panel_1.add(lblArchivesprocessed, gbc_lblArchivesprocessed);
+		JLabel label_8 = new JLabel("0%");
+		GridBagConstraints gbc_label_8 = new GridBagConstraints();
+		gbc_label_8.insets = new Insets(0, 0, 5, 0);
+		gbc_label_8.gridx = 4;
+		gbc_label_8.gridy = 5;
+		panel_1.add(label_8, gbc_label_8);
 		
 		JLabel lblArchivesProcessed_1 = new JLabel("Archives Skipped:");
 		lblArchivesProcessed_1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -296,29 +299,20 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesProcessed_1.gridy = 8;
 		panel_1.add(lblArchivesProcessed_1, gbc_lblArchivesProcessed_1);
 		
-		JLabel label_3 = new JLabel("0 (0%)");
+		JLabel label_3 = new JLabel("0");
 		GridBagConstraints gbc_label_3 = new GridBagConstraints();
 		gbc_label_3.anchor = GridBagConstraints.WEST;
-		gbc_label_3.insets = new Insets(0, 0, 5, 0);
+		gbc_label_3.insets = new Insets(0, 0, 5, 5);
 		gbc_label_3.gridx = 3;
 		gbc_label_3.gridy = 8;
 		panel_1.add(label_3, gbc_label_3);
 		
-		JLabel lblResourcesProcessed = new JLabel("Resources Processed:");
-		GridBagConstraints gbc_lblResourcesProcessed = new GridBagConstraints();
-		gbc_lblResourcesProcessed.anchor = GridBagConstraints.EAST;
-		gbc_lblResourcesProcessed.insets = new Insets(0, 0, 5, 5);
-		gbc_lblResourcesProcessed.gridx = 2;
-		gbc_lblResourcesProcessed.gridy = 9;
-		panel_1.add(lblResourcesProcessed, gbc_lblResourcesProcessed);
-		
-		JLabel label = new JLabel("100 (100%)");
-		GridBagConstraints gbc_label = new GridBagConstraints();
-		gbc_label.insets = new Insets(0, 0, 5, 0);
-		gbc_label.anchor = GridBagConstraints.WEST;
-		gbc_label.gridx = 3;
-		gbc_label.gridy = 9;
-		panel_1.add(label, gbc_label);
+		JLabel label_10 = new JLabel("0%");
+		GridBagConstraints gbc_label_10 = new GridBagConstraints();
+		gbc_label_10.insets = new Insets(0, 0, 5, 0);
+		gbc_label_10.gridx = 4;
+		gbc_label_10.gridy = 8;
+		panel_1.add(label_10, gbc_label_10);
 		
 		JLabel lblResourcesSkipped = new JLabel("Resources Skipped");
 		GridBagConstraints gbc_lblResourcesSkipped = new GridBagConstraints();
@@ -328,27 +322,72 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesSkipped.gridy = 10;
 		panel_1.add(lblResourcesSkipped, gbc_lblResourcesSkipped);
 		
-		JLabel label_4 = new JLabel("0 (0%)");
+		JLabel label_4 = new JLabel("0");
 		GridBagConstraints gbc_label_4 = new GridBagConstraints();
+		gbc_label_4.insets = new Insets(0, 0, 0, 5);
 		gbc_label_4.anchor = GridBagConstraints.WEST;
 		gbc_label_4.gridx = 3;
 		gbc_label_4.gridy = 10;
 		panel_1.add(label_4, gbc_label_4);
 		
 		JPanel panel_2 = new JPanel();
-		panel.add(panel_2, BorderLayout.EAST);
+		panel.add(panel_2);
 		GridBagLayout gbl_panel_2 = new GridBagLayout();
-		gbl_panel_2.columnWidths = new int[]{0, 0};
-		gbl_panel_2.rowHeights = new int[]{0, 0};
-		gbl_panel_2.columnWeights = new double[]{0.0, Double.MIN_VALUE};
-		gbl_panel_2.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		gbl_panel_2.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_2.setLayout(gbl_panel_2);
 		
-		JLabel lblNewLabel = new JLabel("New label");
+		JLabel lblNewLabel = new JLabel("Process Operation");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 0;
 		panel_2.add(lblNewLabel, gbc_lblNewLabel);
+		
+		JLabel lblArchivesProcessed = new JLabel("Archives Processed:");
+		GridBagConstraints gbc_lblArchivesProcessed = new GridBagConstraints();
+		gbc_lblArchivesProcessed.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesProcessed.gridx = 1;
+		gbc_lblArchivesProcessed.gridy = 3;
+		panel_2.add(lblArchivesProcessed, gbc_lblArchivesProcessed);
+		lblArchivesProcessed.setHorizontalAlignment(SwingConstants.RIGHT);
+		
+		JLabel lblArchivesprocessed = new JLabel("0");
+		GridBagConstraints gbc_lblArchivesprocessed = new GridBagConstraints();
+		gbc_lblArchivesprocessed.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesprocessed.gridx = 2;
+		gbc_lblArchivesprocessed.gridy = 3;
+		panel_2.add(lblArchivesprocessed, gbc_lblArchivesprocessed);
+		
+		JLabel label_9 = new JLabel("0%");
+		GridBagConstraints gbc_label_9 = new GridBagConstraints();
+		gbc_label_9.insets = new Insets(0, 0, 5, 5);
+		gbc_label_9.gridx = 3;
+		gbc_label_9.gridy = 3;
+		panel_2.add(label_9, gbc_label_9);
+		
+		JLabel lblResourcesProcessed = new JLabel("Resources Processed:");
+		GridBagConstraints gbc_lblResourcesProcessed = new GridBagConstraints();
+		gbc_lblResourcesProcessed.insets = new Insets(0, 0, 0, 5);
+		gbc_lblResourcesProcessed.gridx = 1;
+		gbc_lblResourcesProcessed.gridy = 4;
+		panel_2.add(lblResourcesProcessed, gbc_lblResourcesProcessed);
+		
+		JLabel label = new JLabel("100");
+		GridBagConstraints gbc_label = new GridBagConstraints();
+		gbc_label.insets = new Insets(0, 0, 0, 5);
+		gbc_label.gridx = 2;
+		gbc_label.gridy = 4;
+		panel_2.add(label, gbc_label);
+		
+		JLabel label_11 = new JLabel("0%");
+		GridBagConstraints gbc_label_11 = new GridBagConstraints();
+		gbc_label_11.insets = new Insets(0, 0, 0, 5);
+		gbc_label_11.gridx = 3;
+		gbc_label_11.gridy = 4;
+		panel_2.add(label_11, gbc_label_11);
 		
 		threadSlider = new JSlider();
 		threadSlider.getSnapToTicks();
