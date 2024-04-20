@@ -15,6 +15,7 @@ import com.gamebuster19901.excite.modding.game.file.kaitai.TocMonster.Details;
 public class Unarchiver {
 
 	private static final Path runDir = Path.of(".").resolve("run");
+	private static final Path ripDir = runDir.resolve("rip");
 	
 	public LinkedHashSet<Path> tocs = new LinkedHashSet<>();
 	public LinkedHashSet<Path> archives = new LinkedHashSet<>();
@@ -49,7 +50,7 @@ public class Unarchiver {
 			throw new FileNotFoundException("Resource file for toc " + tocFile);
 		}
 		
-		archive.writeTo(runDir);
+		archive.writeTo(ripDir);
 	}
 	
 	@SuppressWarnings("resource")

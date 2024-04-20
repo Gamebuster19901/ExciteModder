@@ -1,4 +1,4 @@
-package com.gamebuster19901.excite.modding;
+package com.gamebuster19901.excite.modding.util;
 
 import java.io.File;
 import java.io.IOError;
@@ -65,7 +65,9 @@ public class FileUtils {
 	}
 	
 	public static Path createTempFile() throws IOException {
-		return Files.createTempFile(TEMP, null, null);
+		Path f = Files.createTempFile(TEMP, null, null);
+		System.out.println("Created temporary file " + f);
+		return f;
 	}
 	
 	public static Path createTempFile(String name) throws IOException {
