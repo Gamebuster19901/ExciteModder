@@ -1,6 +1,8 @@
 package com.gamebuster19901.excite.modding.ui;
 
 import java.awt.Component;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.TreeMap;
 
@@ -23,7 +25,6 @@ public abstract class FixedCellGrid extends JComponent {
 		
 		components.forEach((index, component) -> {
 			component.setBounds(calculateCellX(index), calculateCellY(index), getCellWidth(), getCellHeight());
-			//System.out.println("Rendering component " + index + " at " + component.getX() + ", " + component.getY());
 		});
 		
 	}
@@ -57,6 +58,20 @@ public abstract class FixedCellGrid extends JComponent {
     	super.add(component);
     	System.out.println("Adding component " + component + " at index " + index);
     	return components.put(index, component);
+    }
+    
+    public final void removeComponent(Integer index) {
+    	Component toRemove = getComponent(index);
+    	if(toRemove != null) {
+    		components.remove(index); //we want to remove from the grid directly since it will be much faster than the overridden FixedCellGrid.remove()
+    		super.remove(toRemove); //Then use super to remove the component reference from swing
+    	}
+    }
+    
+    @Override
+    public void removeAll() {
+    	components.clear();
+    	super.removeAll();
     }
     
     public final int getLowestFreeCell() {
@@ -95,6 +110,33 @@ public abstract class FixedCellGrid extends JComponent {
     	System.out.println("Adding component at index " + getLowestFreeCell());
         putComponent(getLowestFreeCell(), component);
         return component;
+    }
+    
+    @Override
+    @Deprecated
+    public Component add(Component component, int index) {
+    	putComponent(index, component);
+    	return component;
+    }
+    
+    @Override
+    @Deprecated
+    public void remove(Component component) {
+    	Iterator<Entry<Integer, Component>> set = components.entrySet().iterator();
+    	while(set.hasNext()) {
+    		Entry<Integer, Component> e = set.next();
+    		if(e.getValue() == component) {
+    			set.remove();
+    			break;
+    		}
+    	}
+    	super.remove(component);
+    }
+    
+    @Override
+    @Deprecated
+    public void remove(int index) {
+    	removeComponent(index);
     }
 
     @Override

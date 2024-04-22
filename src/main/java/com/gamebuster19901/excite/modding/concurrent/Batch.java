@@ -10,11 +10,21 @@ import static java.lang.Thread.State;
 
 public class Batch implements Batcher {
 
+	private final String name;
     private final Set<BatchedCallable> runnables = new HashSet<>();
     private final LinkedHashSet<BatchListener> listeners = new LinkedHashSet<>();
     private volatile boolean accepting = true;
     
+    public Batch(String name) {
+    	this.name = name;
+    }
     
+    @Override
+    public String getName() {
+    	return name;
+    }
+    
+    @Override
     public void addRunnable(Callable<Void> runnable) {
     	if(accepting) {
 	    	BatchedCallable b = new BatchedCallable(runnable);
@@ -26,6 +36,7 @@ public class Batch implements Batcher {
     	}
     }
 
+    @Override
     public void addRunnable(Runnable runnable) {
     	if(accepting) {
 	        BatchedCallable b = new BatchedCallable(runnable);
@@ -37,6 +48,7 @@ public class Batch implements Batcher {
     	}
     }
     
+    @Override
     public void addListener(BatchListener listener) {
     	if(accepting) {
 	    	if(!listeners.add(listener)) {

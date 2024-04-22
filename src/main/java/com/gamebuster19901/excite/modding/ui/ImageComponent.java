@@ -9,11 +9,12 @@ public class ImageComponent extends JComponent {
 
 	Image image = null;
 	
-	public ImageComponent() {
-		this(null);
+	public ImageComponent(String name) {
+		this(name, null);
 	}
 	
-	public ImageComponent(Image image) {
+	public ImageComponent(String name, Image image) {
+		this.setName(name);
 		this.image = image;
 	}
 	

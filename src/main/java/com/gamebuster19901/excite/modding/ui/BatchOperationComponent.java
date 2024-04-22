@@ -2,30 +2,35 @@ package com.gamebuster19901.excite.modding.ui;
 
 import javax.swing.JPanel;
 
+import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
 import com.gamebuster19901.excite.modding.concurrent.BatchContainer;
-
+import com.gamebuster19901.excite.modding.concurrent.BatchListener;
 import java.awt.BorderLayout;
+import java.util.Collection;
+
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
-public class BatchOperationComponent extends JPanel {
+public class BatchOperationComponent extends JPanel implements BatchContainer {
 	
 	private BatchedImageComponent batch;
-	private String name;
 	private JLabel fileName;
 	
-	public BatchOperationComponent(BatchContainer batch, String name) {
-		this(new BatchedImageComponent(batch), name);
+	public BatchOperationComponent(BatchContainer batch) {
+		this(new BatchedImageComponent(batch));
+		setName(batch.getName());
 	}
 	
 	/**
 	@wbp.parser.constructor
 	**/
-	public BatchOperationComponent(BatchedImageComponent batch, String name) {
+	public BatchOperationComponent(BatchedImageComponent batch) {
 		this.batch = batch;
 		setLayout(new BorderLayout(0, 0));
 		
 		add(batch, BorderLayout.CENTER);
+		
+		String name = batch.getName();
 		
 		fileName = new JLabel(name);
 		fileName.setHorizontalAlignment(SwingConstants.CENTER);
@@ -38,6 +43,16 @@ public class BatchOperationComponent extends JPanel {
 		super.setName(name);
 		this.setToolTipText(name);
 		this.fileName.setText(name);
+	}
+
+	@Override
+	public Collection<BatchedCallable> getRunnables() {
+		return batch.getRunnables();
+	}
+
+	@Override
+	public Collection<BatchListener> getListeners() {
+		return batch.getListeners();
 	}
 	
 }

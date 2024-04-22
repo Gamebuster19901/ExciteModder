@@ -9,20 +9,27 @@ import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
 
 public class BatchRunner implements BatchWorker {
 
+	private final String name;
 	private final ExecutorService executor;
 	private final LinkedHashSet<Batcher> batches = new LinkedHashSet<Batcher>();
 	private volatile boolean started = false;
 	
-    public BatchRunner() {
-    	this(Runtime.getRuntime().availableProcessors());
+    public BatchRunner(String name) {
+    	this(name, Runtime.getRuntime().availableProcessors());
     }
     
-    public BatchRunner(int threads) throws IllegalArgumentException {
-    	this(Executors.newFixedThreadPool(threads));
+    public BatchRunner(String name, int threads) throws IllegalArgumentException {
+    	this(name, Executors.newFixedThreadPool(threads));
     }
 	
-	public BatchRunner(ExecutorService executor) {
+	public BatchRunner(String name, ExecutorService executor) {
+		this.name = name;
 		this.executor = executor;
+	}
+	
+	@Override
+	public String getName() {
+		return name;
 	}
 
 	@Override
@@ -88,6 +95,10 @@ public class BatchRunner implements BatchWorker {
 			}
 			return ret;
 		}
+	}
+	
+	public Collection<Batcher> getBatches() {
+		return (Collection<Batcher>) batches.clone();
 	}
 
 	public int getCompleted() {

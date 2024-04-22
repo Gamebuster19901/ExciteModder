@@ -5,7 +5,6 @@ import java.awt.Image;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import com.gamebuster19901.excite.modding.concurrent.BatchListener;
-import com.gamebuster19901.excite.modding.concurrent.Batch;
 import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
 import com.gamebuster19901.excite.modding.concurrent.BatchContainer;
 
@@ -13,11 +12,8 @@ public class BatchedImageComponent extends ImageComponent implements BatchContai
 
 	private final BatchContainer batch;
 	
-	public BatchedImageComponent() {
-		this(new Batch());
-	}
-	
 	public BatchedImageComponent(BatchContainer batch) {
+		super(batch.getName());
 		this.batch = batch;
 	}
 	

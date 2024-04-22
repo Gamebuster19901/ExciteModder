@@ -5,6 +5,8 @@ import java.util.Collection;
 import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
 
 public interface BatchContainer {
+	
+	public abstract String getName();
 
 	public Collection<BatchedCallable> getRunnables();
 	

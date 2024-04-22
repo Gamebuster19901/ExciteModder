@@ -7,31 +7,36 @@ import java.awt.Insets;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.PrintStream;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.swing.JFrame;
 import com.gamebuster19901.excite.modding.concurrent.BatchListener;
 import com.gamebuster19901.excite.modding.concurrent.BatchRunner;
+import com.gamebuster19901.excite.modding.concurrent.Batcher;
 import com.gamebuster19901.excite.modding.util.SplitOutputStream;
 import com.gamebuster19901.excite.modding.concurrent.Batch;
+import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
+import com.gamebuster19901.excite.modding.concurrent.BatchContainer;
 
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JSlider;
 import javax.swing.JProgressBar;
-import javax.swing.SwingConstants;
 import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 
 public class Window implements BatchListener, MouseWheelListener {
 
@@ -45,9 +50,13 @@ public class Window implements BatchListener, MouseWheelListener {
 	private JSlider threadSlider;
 	private JLabel lblThreads;
 	private static Window window;
-	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private final JProgressBar progressBar = new JProgressBar();
+	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+	private final FixedCellGrid gridPanel = genGridPanel();
 	private JTable table;
+	
+	private BatchRunner copyOperations;
+	private BatchRunner processOperations;
 
 	/**
 	 * Launch the application.
@@ -81,6 +90,14 @@ public class Window implements BatchListener, MouseWheelListener {
 	 * @throws InterruptedException 
 	 */
 	private void initialize() throws InterruptedException {
+		
+		copyOperations = genCopyBatches();
+		
+		setupFrame();
+		setupTabbedPane();
+	}
+	
+	private void setupFrame() {
 		frame = new JFrame();
 		frame.setTitle("ExciteModder");
 		frame.setBounds(100, 100, 1000, 680);
@@ -118,19 +135,68 @@ public class Window implements BatchListener, MouseWheelListener {
 		btnChangeDest.setToolTipText("Change where ExciteModder will copy the game files to");
 		btnChangeDest.setBounds(761, 36, 117, 19);
 		frame.getContentPane().add(btnChangeDest);
+		
+		threadSlider = new JSlider();
+		threadSlider.getSnapToTicks();
+		threadSlider.setMinimum(1);
+		threadSlider.setMaximum(Runtime.getRuntime().availableProcessors());
+		threadSlider.setValue(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
+		threadSlider.setBounds(5, 90, 92, 16);
+		threadSlider.addChangeListener((s) -> {
+			if(lblThreads != null) {
+				lblThreads.setText("Threads: " + threadSlider.getValue());
+			}
+		});
+		frame.getContentPane().add(threadSlider);
+		
+		lblThreads = new JLabel("Threads: " + threadSlider.getValue());
+		lblThreads.setBounds(12, 74, 132, 15);
+		frame.getContentPane().add(lblThreads);
+		
+		JSeparator separator = new JSeparator();
+		separator.setBounds(12, 64, 971, 2);
+		frame.getContentPane().add(separator);
+		
+		progressBar.setVisible(false);
+		
+		JLabel lblStatus = new JLabel("Progress: 0%");
+		lblStatus.setHorizontalAlignment(SwingConstants.CENTER);
+		lblStatus.setBounds(440, 110, 120, 15);
+		lblStatus.setVisible(false);
+		
+		frame.getContentPane().add(lblStatus);
+		progressBar.setBounds(12, 110, 971, 15);
+		frame.getContentPane().add(progressBar);
+		
+		JButton btnExtract = new JButton("Extract!");
+		btnExtract.setBounds(890, 9, 93, 45);
+		btnExtract.setEnabled(false);
+		
+		frame.getContentPane().add(btnExtract);
+		frame.validate();
+		frame.repaint();
+		tabbedPane.addMouseWheelListener(this);
+	}
+	
+	private void setupTabbedPane() {
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
 		tabbedPane.setBounds(0, 129, 1000, 511);
 		frame.getContentPane().add(tabbedPane);
 		
-
+		setupConsoleOutputTab();
+		setupStatusTab();
+		setupProgressTab();
 		
+		for(Batcher b : copyOperations.getBatches()) {
+			tabbedPane.addTab(b.getName(), null);
+		}
 		
-		FixedCellGrid gridPanel = new FixedCellSizeGrid(new Dimension(385, 385), new Dimension(100, 100), 0);
-				
-		gridPanel.setVisible(true);
-		gridPanel.components.remove(-1);
-		
+	}
+	
+	private void setupConsoleOutputTab() {
+		JPanel consolePanel = new JPanel();
+		consolePanel.setLayout(new GridLayout(0, 2, 0, 0));
 		JTextArea textArea = new JTextArea();
 		textArea.setBorder(BorderFactory.createLoweredBevelBorder());
 		textArea.setOpaque(true);
@@ -141,51 +207,55 @@ public class Window implements BatchListener, MouseWheelListener {
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		tabbedPane.addTab("Console Output", null, scrollPane, null);
+	}
+	
+	public void setupStatusTab() {
 		tabbedPane.addTab("Status", null, gridPanel, null);
-		
-		JPanel panel = new JPanel();
-		tabbedPane.addTab("Progress", null, panel, null);
-		
-		//gridPanel.setPreferredSize(new Dimension(814, 406));
-				
-		BatchRunner batchRunner = new BatchRunner();
-		for(int i = 0; i < 10; i++) {
-			Batch b = new Batch();
-			batchRunner.addBatch(b);
-			BatchOperationComponent c = new BatchOperationComponent(b, "File " + i);
-			gridPanel.putComponent(i, c);
-			if(i == 5) {
-				c.setName("A very long file name");
-			}
-			tabbedPane.addTab(c.getName(), null);
+		Iterator<Batcher> batches = copyOperations.getBatches().iterator();
+		int i = 0;
+		while(batches.hasNext()) {
+			gridPanel.putComponent(i, new BatchOperationComponent(batches.next()));
+			i++;
 		}
-		panel.setLayout(new GridLayout(0, 2, 0, 0));
+	}
+	
+	public void setupProgressTab() {
+		JPanel progressPanel = new JPanel();
+		tabbedPane.addTab("Progress", null, progressPanel, null);
 		
+		progressPanel.setLayout(new GridLayout(0, 2, 0, 0));
+		setupLeftProgressPane(progressPanel);
+		setupRightProgressPane(progressPanel);
+		
+
+	}
+	
+	private void setupLeftProgressPane(JPanel progressPanel) {
 		JPanel panel_1 = new JPanel();
-		panel.add(panel_1);
+		progressPanel.add(panel_1);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[]{100, 0, 70, 90, 0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_1.columnWidths = new int[] {100, 0, 70, 90, 0, 0, 0};
+		gbl_panel_1.rowHeights = new int[] {0, 15, 0, 30, 0, 0, 30, 30, 0, 0, 30, 0};
 		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
 		JLabel lblCopyOperation = new JLabel("Copy Operation");
 		GridBagConstraints gbc_lblCopyOperation = new GridBagConstraints();
-		gbc_lblCopyOperation.gridwidth = 5;
+		gbc_lblCopyOperation.gridwidth = 6;
 		gbc_lblCopyOperation.insets = new Insets(0, 0, 5, 0);
 		gbc_lblCopyOperation.gridx = 0;
 		gbc_lblCopyOperation.gridy = 0;
 		panel_1.add(lblCopyOperation, gbc_lblCopyOperation);
-		BatchOperationComponent allBatches = new BatchOperationComponent(batchRunner, "All Batches");
-		allBatches.setToolTipText("All Batches");
+		BatchOperationComponent allBatchesCopy = new BatchOperationComponent(copyOperations);
+		allBatchesCopy.setToolTipText("All Batches");
 		GridBagConstraints gbc_allBatches = new GridBagConstraints();
 		gbc_allBatches.fill = GridBagConstraints.BOTH;
-		gbc_allBatches.gridheight = 10;
+		gbc_allBatches.gridheight = 9;
 		gbc_allBatches.insets = new Insets(0, 0, 0, 5);
 		gbc_allBatches.gridx = 0;
 		gbc_allBatches.gridy = 1;
-		panel_1.add(allBatches, gbc_allBatches);
+		panel_1.add(allBatchesCopy, gbc_allBatches);
 		
 		JSeparator separator_1 = new JSeparator();
 		GridBagConstraints gbc_separator_1 = new GridBagConstraints();
@@ -314,33 +384,36 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_label_10.gridy = 8;
 		panel_1.add(label_10, gbc_label_10);
 		
-		JLabel lblResourcesSkipped = new JLabel("Resources Skipped");
+		JLabel lblResourcesSkipped = new JLabel("Resources Skipped:");
 		GridBagConstraints gbc_lblResourcesSkipped = new GridBagConstraints();
 		gbc_lblResourcesSkipped.anchor = GridBagConstraints.EAST;
-		gbc_lblResourcesSkipped.insets = new Insets(0, 0, 0, 5);
+		gbc_lblResourcesSkipped.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesSkipped.gridx = 2;
-		gbc_lblResourcesSkipped.gridy = 10;
+		gbc_lblResourcesSkipped.gridy = 9;
 		panel_1.add(lblResourcesSkipped, gbc_lblResourcesSkipped);
 		
 		JLabel label_4 = new JLabel("0");
 		GridBagConstraints gbc_label_4 = new GridBagConstraints();
-		gbc_label_4.insets = new Insets(0, 0, 0, 5);
+		gbc_label_4.insets = new Insets(0, 0, 5, 5);
 		gbc_label_4.anchor = GridBagConstraints.WEST;
 		gbc_label_4.gridx = 3;
-		gbc_label_4.gridy = 10;
+		gbc_label_4.gridy = 9;
 		panel_1.add(label_4, gbc_label_4);
-		
+	}
+	
+	private void setupRightProgressPane(JPanel progressPanel) {
 		JPanel panel_2 = new JPanel();
-		panel.add(panel_2);
+		progressPanel.add(panel_2);
 		GridBagLayout gbl_panel_2 = new GridBagLayout();
-		gbl_panel_2.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_panel_2.columnWidths = new int[] {30, 0, 0, 0, 30, 30, 0, 0};
+		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_2.setLayout(gbl_panel_2);
 		
 		JLabel lblNewLabel = new JLabel("Process Operation");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.gridwidth = 7;
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 0;
@@ -370,66 +443,44 @@ public class Window implements BatchListener, MouseWheelListener {
 		
 		JLabel lblResourcesProcessed = new JLabel("Resources Processed:");
 		GridBagConstraints gbc_lblResourcesProcessed = new GridBagConstraints();
-		gbc_lblResourcesProcessed.insets = new Insets(0, 0, 0, 5);
+		gbc_lblResourcesProcessed.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesProcessed.gridx = 1;
 		gbc_lblResourcesProcessed.gridy = 4;
 		panel_2.add(lblResourcesProcessed, gbc_lblResourcesProcessed);
 		
 		JLabel label = new JLabel("100");
 		GridBagConstraints gbc_label = new GridBagConstraints();
-		gbc_label.insets = new Insets(0, 0, 0, 5);
+		gbc_label.insets = new Insets(0, 0, 5, 5);
 		gbc_label.gridx = 2;
 		gbc_label.gridy = 4;
 		panel_2.add(label, gbc_label);
 		
 		JLabel label_11 = new JLabel("0%");
 		GridBagConstraints gbc_label_11 = new GridBagConstraints();
-		gbc_label_11.insets = new Insets(0, 0, 0, 5);
+		gbc_label_11.insets = new Insets(0, 0, 5, 5);
 		gbc_label_11.gridx = 3;
 		gbc_label_11.gridy = 4;
 		panel_2.add(label_11, gbc_label_11);
-		
-		threadSlider = new JSlider();
-		threadSlider.getSnapToTicks();
-		threadSlider.setMinimum(1);
-		threadSlider.setMaximum(Runtime.getRuntime().availableProcessors());
-		threadSlider.setValue(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
-		threadSlider.setBounds(5, 90, 92, 16);
-		threadSlider.addChangeListener((s) -> {
-			if(lblThreads != null) {
-				lblThreads.setText("Threads: " + threadSlider.getValue());
-			}
-		});
-		frame.getContentPane().add(threadSlider);
-		
-		lblThreads = new JLabel("Threads: " + threadSlider.getValue());
-		lblThreads.setBounds(12, 74, 132, 15);
-		frame.getContentPane().add(lblThreads);
-		
-		JSeparator separator = new JSeparator();
-		separator.setBounds(12, 64, 971, 2);
-		frame.getContentPane().add(separator);
-		
-		progressBar.setVisible(false);
-		
-		JLabel lblStatus = new JLabel("Progress: 0%");
-		lblStatus.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStatus.setBounds(440, 110, 120, 15);
-		lblStatus.setVisible(false);
-		
-		frame.getContentPane().add(lblStatus);
-		progressBar.setBounds(12, 110, 971, 15);
-		frame.getContentPane().add(progressBar);
-		
-		JButton btnExtract = new JButton("Extract!");
-		btnExtract.setBounds(890, 9, 93, 45);
-		btnExtract.setEnabled(false);
-		
-		frame.getContentPane().add(btnExtract);
-		frame.validate();
-		frame.repaint();
-		tabbedPane.addMouseWheelListener(this);
-		
+	}
+	
+	private BatchRunner genCopyBatches() {
+		BatchRunner batchRunner = new BatchRunner("Copy Operations");
+		for(int i = 0; i < 10; i++) {
+			Batch b = new Batch("File " + i);
+			batchRunner.addBatch(b);
+		}
+		return batchRunner;
+	}
+	
+	private void setGridBatches(BatchContainer batch, FixedCellGrid grid) {
+		Collection<BatchedCallable> batches = batch.getRunnables();
+		for(int i = 0; i < batches.size(); i++) {
+			tabbedPane.addTab("File " + i, new BatchOperationComponent(batch));
+		}
+	}
+	
+	private BatchRunner getProcessBatches() {
+		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
 	@Override
@@ -465,6 +516,13 @@ public class Window implements BatchListener, MouseWheelListener {
 		else {
 			//System.out.println(e.getSource());
 		}
+	}
+	
+	private FixedCellGrid genGridPanel() {
+		FixedCellGrid gridPanel = new FixedCellSizeGrid(new Dimension(385, 385), new Dimension(100, 100), 0);
+		gridPanel.setVisible(true);
+		
+		return gridPanel;
 	}
 	
 	private int getWantedThreads() {
