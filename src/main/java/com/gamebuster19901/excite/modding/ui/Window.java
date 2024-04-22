@@ -235,15 +235,15 @@ public class Window implements BatchListener, MouseWheelListener {
 		progressPanel.add(panel_1);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[] {100, 0, 70, 90, 0, 0, 0};
-		gbl_panel_1.rowHeights = new int[] {0, 15, 0, 30, 0, 0, 30, 30, 0, 0, 30, 0};
+		gbl_panel_1.rowHeights = new int[] {0, 15, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0};
 		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
 		JLabel lblCopyOperation = new JLabel("Copy Operation");
 		GridBagConstraints gbc_lblCopyOperation = new GridBagConstraints();
 		gbc_lblCopyOperation.gridwidth = 6;
-		gbc_lblCopyOperation.insets = new Insets(0, 0, 5, 0);
+		gbc_lblCopyOperation.insets = new Insets(0, 0, 5, 5);
 		gbc_lblCopyOperation.gridx = 0;
 		gbc_lblCopyOperation.gridy = 0;
 		panel_1.add(lblCopyOperation, gbc_lblCopyOperation);
@@ -251,8 +251,8 @@ public class Window implements BatchListener, MouseWheelListener {
 		allBatchesCopy.setToolTipText("All Batches");
 		GridBagConstraints gbc_allBatches = new GridBagConstraints();
 		gbc_allBatches.fill = GridBagConstraints.BOTH;
-		gbc_allBatches.gridheight = 9;
-		gbc_allBatches.insets = new Insets(0, 0, 0, 5);
+		gbc_allBatches.gridheight = 11;
+		gbc_allBatches.insets = new Insets(0, 0, 0, 0);
 		gbc_allBatches.gridx = 0;
 		gbc_allBatches.gridy = 1;
 		panel_1.add(allBatchesCopy, gbc_allBatches);
@@ -283,21 +283,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblTotalArchivesCount.gridy = 1;
 		panel_1.add(lblTotalArchivesCount, gbc_lblTotalArchivesCount);
 		
-		JLabel label_5 = new JLabel("100%");
-		GridBagConstraints gbc_label_5 = new GridBagConstraints();
-		gbc_label_5.insets = new Insets(0, 0, 5, 0);
-		gbc_label_5.gridx = 4;
-		gbc_label_5.gridy = 1;
-		panel_1.add(label_5, gbc_label_5);
-		
-		JLabel lblTotalResources = new JLabel("Total Resources:");
-		lblTotalResources.setHorizontalAlignment(SwingConstants.RIGHT);
-		GridBagConstraints gbc_lblTotalResources = new GridBagConstraints();
-		gbc_lblTotalResources.anchor = GridBagConstraints.EAST;
-		gbc_lblTotalResources.insets = new Insets(0, 0, 5, 5);
-		gbc_lblTotalResources.gridx = 2;
-		gbc_lblTotalResources.gridy = 2;
-		panel_1.add(lblTotalResources, gbc_lblTotalResources);
+		JLabel lblFoundResources = new JLabel("Total Resources:");
+		lblFoundResources.setHorizontalAlignment(SwingConstants.RIGHT);
+		GridBagConstraints gbc_lblFoundResources = new GridBagConstraints();
+		gbc_lblFoundResources.anchor = GridBagConstraints.EAST;
+		gbc_lblFoundResources.insets = new Insets(0, 0, 5, 5);
+		gbc_lblFoundResources.gridx = 2;
+		gbc_lblFoundResources.gridy = 2;
+		panel_1.add(lblFoundResources, gbc_lblFoundResources);
 		
 		JLabel lblTotalResourcesCount = new JLabel("0");
 		GridBagConstraints gbc_lblTotalResourcesCount = new GridBagConstraints();
@@ -307,13 +300,6 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblTotalResourcesCount.gridy = 2;
 		panel_1.add(lblTotalResourcesCount, gbc_lblTotalResourcesCount);
 		
-		JLabel label_6 = new JLabel("100%");
-		GridBagConstraints gbc_label_6 = new GridBagConstraints();
-		gbc_label_6.insets = new Insets(0, 0, 5, 0);
-		gbc_label_6.gridx = 4;
-		gbc_label_6.gridy = 2;
-		panel_1.add(label_6, gbc_label_6);
-		
 		JLabel lblArchivesCopied = new JLabel("Archives Copied:");
 		GridBagConstraints gbc_lblArchivesCopied = new GridBagConstraints();
 		gbc_lblArchivesCopied.anchor = GridBagConstraints.EAST;
@@ -322,20 +308,20 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesCopied.gridy = 4;
 		panel_1.add(lblArchivesCopied, gbc_lblArchivesCopied);
 		
-		JLabel label_1 = new JLabel("99");
-		GridBagConstraints gbc_label_1 = new GridBagConstraints();
-		gbc_label_1.anchor = GridBagConstraints.WEST;
-		gbc_label_1.insets = new Insets(0, 0, 5, 5);
-		gbc_label_1.gridx = 3;
-		gbc_label_1.gridy = 4;
-		panel_1.add(label_1, gbc_label_1);
+		JLabel lblArchivesCopiedCount = new JLabel("0");
+		GridBagConstraints gbc_lblArchivesCopiedCount = new GridBagConstraints();
+		gbc_lblArchivesCopiedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblArchivesCopiedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesCopiedCount.gridx = 3;
+		gbc_lblArchivesCopiedCount.gridy = 4;
+		panel_1.add(lblArchivesCopiedCount, gbc_lblArchivesCopiedCount);
 		
-		JLabel label_7 = new JLabel("0%");
-		GridBagConstraints gbc_label_7 = new GridBagConstraints();
-		gbc_label_7.insets = new Insets(0, 0, 5, 0);
-		gbc_label_7.gridx = 4;
-		gbc_label_7.gridy = 4;
-		panel_1.add(label_7, gbc_label_7);
+		JLabel lblArchivesCopiedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblArchivesCopiedPercent = new GridBagConstraints();
+		gbc_lblArchivesCopiedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesCopiedPercent.gridx = 4;
+		gbc_lblArchivesCopiedPercent.gridy = 4;
+		panel_1.add(lblArchivesCopiedPercent, gbc_lblArchivesCopiedPercent);
 		
 		JLabel lblResourcesCopied = new JLabel("Resources Copied:");
 		GridBagConstraints gbc_lblResourcesCopied = new GridBagConstraints();
@@ -345,70 +331,124 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesCopied.gridy = 5;
 		panel_1.add(lblResourcesCopied, gbc_lblResourcesCopied);
 		
-		JLabel label_2 = new JLabel("0");
-		GridBagConstraints gbc_label_2 = new GridBagConstraints();
-		gbc_label_2.anchor = GridBagConstraints.WEST;
-		gbc_label_2.insets = new Insets(0, 0, 5, 5);
-		gbc_label_2.gridx = 3;
-		gbc_label_2.gridy = 5;
-		panel_1.add(label_2, gbc_label_2);
+		JLabel lblResourcesCopiedCount = new JLabel("0");
+		GridBagConstraints gbc_lblResourcesCopiedCount = new GridBagConstraints();
+		gbc_lblResourcesCopiedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblResourcesCopiedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcesCopiedCount.gridx = 3;
+		gbc_lblResourcesCopiedCount.gridy = 5;
+		panel_1.add(lblResourcesCopiedCount, gbc_lblResourcesCopiedCount);
 		
-		JLabel label_8 = new JLabel("0%");
-		GridBagConstraints gbc_label_8 = new GridBagConstraints();
-		gbc_label_8.insets = new Insets(0, 0, 5, 0);
-		gbc_label_8.gridx = 4;
-		gbc_label_8.gridy = 5;
-		panel_1.add(label_8, gbc_label_8);
+		JLabel lblResourcesCopiedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblResourcesCopiedPercent = new GridBagConstraints();
+		gbc_lblResourcesCopiedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcesCopiedPercent.gridx = 4;
+		gbc_lblResourcesCopiedPercent.gridy = 5;
+		panel_1.add(lblResourcesCopiedPercent, gbc_lblResourcesCopiedPercent);
 		
-		JLabel lblArchivesProcessed_1 = new JLabel("Archives Skipped:");
-		lblArchivesProcessed_1.setHorizontalAlignment(SwingConstants.RIGHT);
-		GridBagConstraints gbc_lblArchivesProcessed_1 = new GridBagConstraints();
-		gbc_lblArchivesProcessed_1.anchor = GridBagConstraints.EAST;
-		gbc_lblArchivesProcessed_1.insets = new Insets(0, 0, 5, 5);
-		gbc_lblArchivesProcessed_1.gridx = 2;
-		gbc_lblArchivesProcessed_1.gridy = 8;
-		panel_1.add(lblArchivesProcessed_1, gbc_lblArchivesProcessed_1);
+		JLabel lblArchivesSkipped = new JLabel("Archives Skipped:");
+		lblArchivesSkipped.setHorizontalAlignment(SwingConstants.RIGHT);
+		GridBagConstraints gbc_lblArchivesSkipped = new GridBagConstraints();
+		gbc_lblArchivesSkipped.anchor = GridBagConstraints.EAST;
+		gbc_lblArchivesSkipped.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesSkipped.gridx = 2;
+		gbc_lblArchivesSkipped.gridy = 7;
+		panel_1.add(lblArchivesSkipped, gbc_lblArchivesSkipped);
 		
-		JLabel label_3 = new JLabel("0");
-		GridBagConstraints gbc_label_3 = new GridBagConstraints();
-		gbc_label_3.anchor = GridBagConstraints.WEST;
-		gbc_label_3.insets = new Insets(0, 0, 5, 5);
-		gbc_label_3.gridx = 3;
-		gbc_label_3.gridy = 8;
-		panel_1.add(label_3, gbc_label_3);
+		JLabel lblArchivesSkippedCount = new JLabel("0");
+		GridBagConstraints gbc_lblArchivesSkippedCount = new GridBagConstraints();
+		gbc_lblArchivesSkippedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblArchivesSkippedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesSkippedCount.gridx = 3;
+		gbc_lblArchivesSkippedCount.gridy = 7;
+		panel_1.add(lblArchivesSkippedCount, gbc_lblArchivesSkippedCount);
 		
-		JLabel label_10 = new JLabel("0%");
-		GridBagConstraints gbc_label_10 = new GridBagConstraints();
-		gbc_label_10.insets = new Insets(0, 0, 5, 0);
-		gbc_label_10.gridx = 4;
-		gbc_label_10.gridy = 8;
-		panel_1.add(label_10, gbc_label_10);
+		JLabel lblArchivesSkippedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblArchivesSkippedPercent = new GridBagConstraints();
+		gbc_lblArchivesSkippedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesSkippedPercent.gridx = 4;
+		gbc_lblArchivesSkippedPercent.gridy = 7;
+		panel_1.add(lblArchivesSkippedPercent, gbc_lblArchivesSkippedPercent);
 		
 		JLabel lblResourcesSkipped = new JLabel("Resources Skipped:");
 		GridBagConstraints gbc_lblResourcesSkipped = new GridBagConstraints();
 		gbc_lblResourcesSkipped.anchor = GridBagConstraints.EAST;
 		gbc_lblResourcesSkipped.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesSkipped.gridx = 2;
-		gbc_lblResourcesSkipped.gridy = 9;
+		gbc_lblResourcesSkipped.gridy = 8;
 		panel_1.add(lblResourcesSkipped, gbc_lblResourcesSkipped);
 		
-		JLabel label_4 = new JLabel("0");
-		GridBagConstraints gbc_label_4 = new GridBagConstraints();
-		gbc_label_4.insets = new Insets(0, 0, 5, 5);
-		gbc_label_4.anchor = GridBagConstraints.WEST;
-		gbc_label_4.gridx = 3;
-		gbc_label_4.gridy = 9;
-		panel_1.add(label_4, gbc_label_4);
+		JLabel lblResourcesSkippedCount = new JLabel("0");
+		GridBagConstraints gbc_lblResourcesSkippedCount = new GridBagConstraints();
+		gbc_lblResourcesSkippedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcesSkippedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblResourcesSkippedCount.gridx = 3;
+		gbc_lblResourcesSkippedCount.gridy = 8;
+		panel_1.add(lblResourcesSkippedCount, gbc_lblResourcesSkippedCount);
+		
+		JLabel labelResourcesSkippedPercent = new JLabel("0%");
+		GridBagConstraints gbc_labelResourcesSkippedPercent = new GridBagConstraints();
+		gbc_labelResourcesSkippedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_labelResourcesSkippedPercent.gridx = 4;
+		gbc_labelResourcesSkippedPercent.gridy = 8;
+		panel_1.add(labelResourcesSkippedPercent, gbc_labelResourcesSkippedPercent);
+		
+		JLabel lblArchivesFailed = new JLabel("Archives Failed:");
+		lblArchivesFailed.setHorizontalAlignment(SwingConstants.RIGHT);
+		GridBagConstraints gbc_lblArchivesFailed = new GridBagConstraints();
+		gbc_lblArchivesFailed.anchor = GridBagConstraints.EAST;
+		gbc_lblArchivesFailed.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesFailed.gridx = 2;
+		gbc_lblArchivesFailed.gridy = 10;
+		panel_1.add(lblArchivesFailed, gbc_lblArchivesFailed);
+		
+		JLabel lblArchivesFailedCount = new JLabel("0");
+		GridBagConstraints gbc_lblArchivesFailedCount = new GridBagConstraints();
+		gbc_lblArchivesFailedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblArchivesFailedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesFailedCount.gridx = 3;
+		gbc_lblArchivesFailedCount.gridy = 10;
+		panel_1.add(lblArchivesFailedCount, gbc_lblArchivesFailedCount);
+		
+		JLabel lblArchivesFailedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblArchivesFailedPercent = new GridBagConstraints();
+		gbc_lblArchivesFailedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesFailedPercent.gridx = 4;
+		gbc_lblArchivesFailedPercent.gridy = 10;
+		panel_1.add(lblArchivesFailedPercent, gbc_lblArchivesFailedPercent);
+		
+		JLabel lblResourcesFailed = new JLabel("Resources Failed:");
+		GridBagConstraints gbc_lblResourcesFailed = new GridBagConstraints();
+		gbc_lblResourcesFailed.anchor = GridBagConstraints.EAST;
+		gbc_lblResourcesFailed.insets = new Insets(0, 0, 0, 5);
+		gbc_lblResourcesFailed.gridx = 2;
+		gbc_lblResourcesFailed.gridy = 11;
+		panel_1.add(lblResourcesFailed, gbc_lblResourcesFailed);
+		
+		JLabel lblResourcesFailedCount = new JLabel("0");
+		GridBagConstraints gbc_lblResourcesFailedCount = new GridBagConstraints();
+		gbc_lblResourcesFailedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblResourcesFailedCount.insets = new Insets(0, 0, 0, 5);
+		gbc_lblResourcesFailedCount.gridx = 3;
+		gbc_lblResourcesFailedCount.gridy = 11;
+		panel_1.add(lblResourcesFailedCount, gbc_lblResourcesFailedCount);
+		
+		JLabel lblResourcesFailedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblResourcesFailedPercent = new GridBagConstraints();
+		gbc_lblResourcesFailedPercent.insets = new Insets(0, 0, 0, 5);
+		gbc_lblResourcesFailedPercent.gridx = 4;
+		gbc_lblResourcesFailedPercent.gridy = 11;
+		panel_1.add(lblResourcesFailedPercent, gbc_lblResourcesFailedPercent);
 	}
 	
 	private void setupRightProgressPane(JPanel progressPanel) {
 		JPanel panel_2 = new JPanel();
 		progressPanel.add(panel_2);
 		GridBagLayout gbl_panel_2 = new GridBagLayout();
-		gbl_panel_2.columnWidths = new int[] {30, 0, 0, 0, 30, 30, 0, 0};
-		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_2.columnWidths = new int[] {30, 0, 90, 0, 30, 30, 0, 0};
+		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_2.setLayout(gbl_panel_2);
 		
 		JLabel lblNewLabel = new JLabel("Process Operation");
@@ -419,48 +459,176 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblNewLabel.gridy = 0;
 		panel_2.add(lblNewLabel, gbc_lblNewLabel);
 		
+		JLabel lblTotalArchives = new JLabel("Total Archives:");
+		GridBagConstraints gbc_lblTotalArchives = new GridBagConstraints();
+		gbc_lblTotalArchives.anchor = GridBagConstraints.EAST;
+		gbc_lblTotalArchives.insets = new Insets(0, 0, 5, 5);
+		gbc_lblTotalArchives.gridx = 1;
+		gbc_lblTotalArchives.gridy = 1;
+		panel_2.add(lblTotalArchives, gbc_lblTotalArchives);
+		
+		JLabel lblTotalArchvesCount = new JLabel("0");
+		GridBagConstraints gbc_lblTotalArchvesCount = new GridBagConstraints();
+		gbc_lblTotalArchvesCount.anchor = GridBagConstraints.WEST;
+		gbc_lblTotalArchvesCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblTotalArchvesCount.gridx = 2;
+		gbc_lblTotalArchvesCount.gridy = 1;
+		panel_2.add(lblTotalArchvesCount, gbc_lblTotalArchvesCount);
+		
+		JLabel lblTotalResources = new JLabel("Total Resources:");
+		GridBagConstraints gbc_lblTotalResources = new GridBagConstraints();
+		gbc_lblTotalResources.anchor = GridBagConstraints.EAST;
+		gbc_lblTotalResources.insets = new Insets(0, 0, 5, 5);
+		gbc_lblTotalResources.gridx = 1;
+		gbc_lblTotalResources.gridy = 2;
+		panel_2.add(lblTotalResources, gbc_lblTotalResources);
+		
+		JLabel lblTotalResourcesCount = new JLabel("0");
+		GridBagConstraints gbc_lblTotalResourcesCount = new GridBagConstraints();
+		gbc_lblTotalResourcesCount.anchor = GridBagConstraints.WEST;
+		gbc_lblTotalResourcesCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblTotalResourcesCount.gridx = 2;
+		gbc_lblTotalResourcesCount.gridy = 2;
+		panel_2.add(lblTotalResourcesCount, gbc_lblTotalResourcesCount);
+		
 		JLabel lblArchivesProcessed = new JLabel("Archives Processed:");
 		GridBagConstraints gbc_lblArchivesProcessed = new GridBagConstraints();
+		gbc_lblArchivesProcessed.anchor = GridBagConstraints.EAST;
 		gbc_lblArchivesProcessed.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesProcessed.gridx = 1;
-		gbc_lblArchivesProcessed.gridy = 3;
+		gbc_lblArchivesProcessed.gridy = 4;
 		panel_2.add(lblArchivesProcessed, gbc_lblArchivesProcessed);
 		lblArchivesProcessed.setHorizontalAlignment(SwingConstants.RIGHT);
 		
-		JLabel lblArchivesprocessed = new JLabel("0");
-		GridBagConstraints gbc_lblArchivesprocessed = new GridBagConstraints();
-		gbc_lblArchivesprocessed.insets = new Insets(0, 0, 5, 5);
-		gbc_lblArchivesprocessed.gridx = 2;
-		gbc_lblArchivesprocessed.gridy = 3;
-		panel_2.add(lblArchivesprocessed, gbc_lblArchivesprocessed);
+		JLabel lblArchivesProcessedCount = new JLabel("0");
+		GridBagConstraints gbc_lblArchivesProcessedCount = new GridBagConstraints();
+		gbc_lblArchivesProcessedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblArchivesProcessedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesProcessedCount.gridx = 2;
+		gbc_lblArchivesProcessedCount.gridy = 4;
+		panel_2.add(lblArchivesProcessedCount, gbc_lblArchivesProcessedCount);
 		
-		JLabel label_9 = new JLabel("0%");
-		GridBagConstraints gbc_label_9 = new GridBagConstraints();
-		gbc_label_9.insets = new Insets(0, 0, 5, 5);
-		gbc_label_9.gridx = 3;
-		gbc_label_9.gridy = 3;
-		panel_2.add(label_9, gbc_label_9);
+		JLabel lblArchivesProcessedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblArchivesProcessedPercent = new GridBagConstraints();
+		gbc_lblArchivesProcessedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesProcessedPercent.gridx = 3;
+		gbc_lblArchivesProcessedPercent.gridy = 4;
+		panel_2.add(lblArchivesProcessedPercent, gbc_lblArchivesProcessedPercent);
 		
 		JLabel lblResourcesProcessed = new JLabel("Resources Processed:");
 		GridBagConstraints gbc_lblResourcesProcessed = new GridBagConstraints();
+		gbc_lblResourcesProcessed.anchor = GridBagConstraints.EAST;
 		gbc_lblResourcesProcessed.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesProcessed.gridx = 1;
-		gbc_lblResourcesProcessed.gridy = 4;
+		gbc_lblResourcesProcessed.gridy = 5;
 		panel_2.add(lblResourcesProcessed, gbc_lblResourcesProcessed);
 		
-		JLabel label = new JLabel("100");
-		GridBagConstraints gbc_label = new GridBagConstraints();
-		gbc_label.insets = new Insets(0, 0, 5, 5);
-		gbc_label.gridx = 2;
-		gbc_label.gridy = 4;
-		panel_2.add(label, gbc_label);
+		JLabel lblResourcesProcessedCount = new JLabel("0");
+		GridBagConstraints gbc_lblResourcesProcessedCount = new GridBagConstraints();
+		gbc_lblResourcesProcessedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblResourcesProcessedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcesProcessedCount.gridx = 2;
+		gbc_lblResourcesProcessedCount.gridy = 5;
+		panel_2.add(lblResourcesProcessedCount, gbc_lblResourcesProcessedCount);
 		
-		JLabel label_11 = new JLabel("0%");
-		GridBagConstraints gbc_label_11 = new GridBagConstraints();
-		gbc_label_11.insets = new Insets(0, 0, 5, 5);
-		gbc_label_11.gridx = 3;
-		gbc_label_11.gridy = 4;
-		panel_2.add(label_11, gbc_label_11);
+		JLabel lblResourcesProcessedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblResourcesProcessedPercent = new GridBagConstraints();
+		gbc_lblResourcesProcessedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcesProcessedPercent.gridx = 3;
+		gbc_lblResourcesProcessedPercent.gridy = 5;
+		panel_2.add(lblResourcesProcessedPercent, gbc_lblResourcesProcessedPercent);
+		
+		JLabel lblArchivesSkipped = new JLabel("Archives Skipped:");
+		GridBagConstraints gbc_lblArchivesSkipped = new GridBagConstraints();
+		gbc_lblArchivesSkipped.anchor = GridBagConstraints.EAST;
+		gbc_lblArchivesSkipped.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesSkipped.gridx = 1;
+		gbc_lblArchivesSkipped.gridy = 7;
+		panel_2.add(lblArchivesSkipped, gbc_lblArchivesSkipped);
+		
+		JLabel lblArchivesSkippedCount = new JLabel("0");
+		GridBagConstraints gbc_lblArchivesSkippedCount = new GridBagConstraints();
+		gbc_lblArchivesSkippedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblArchivesSkippedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesSkippedCount.gridx = 2;
+		gbc_lblArchivesSkippedCount.gridy = 7;
+		panel_2.add(lblArchivesSkippedCount, gbc_lblArchivesSkippedCount);
+		
+		JLabel lblArchivesSkippedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblArchivesSkippedPercent = new GridBagConstraints();
+		gbc_lblArchivesSkippedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesSkippedPercent.gridx = 3;
+		gbc_lblArchivesSkippedPercent.gridy = 7;
+		panel_2.add(lblArchivesSkippedPercent, gbc_lblArchivesSkippedPercent);
+		
+		JLabel lblResourcesSkipped = new JLabel("Resources Skipped:");
+		GridBagConstraints gbc_lblResourcesSkipped = new GridBagConstraints();
+		gbc_lblResourcesSkipped.anchor = GridBagConstraints.EAST;
+		gbc_lblResourcesSkipped.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcesSkipped.gridx = 1;
+		gbc_lblResourcesSkipped.gridy = 8;
+		panel_2.add(lblResourcesSkipped, gbc_lblResourcesSkipped);
+		
+		JLabel lblResourcesSkippedCount = new JLabel("0");
+		GridBagConstraints gbc_lblResourcesSkippedCount = new GridBagConstraints();
+		gbc_lblResourcesSkippedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblResourcesSkippedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcesSkippedCount.gridx = 2;
+		gbc_lblResourcesSkippedCount.gridy = 8;
+		panel_2.add(lblResourcesSkippedCount, gbc_lblResourcesSkippedCount);
+		
+		JLabel lblResourcesSkippedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblResourcesSkippedPercent = new GridBagConstraints();
+		gbc_lblResourcesSkippedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcesSkippedPercent.gridx = 3;
+		gbc_lblResourcesSkippedPercent.gridy = 8;
+		panel_2.add(lblResourcesSkippedPercent, gbc_lblResourcesSkippedPercent);
+		
+		JLabel lblArchivesFailed = new JLabel("Archives Failed:");
+		GridBagConstraints gbc_lblArchivesFailed = new GridBagConstraints();
+		gbc_lblArchivesFailed.anchor = GridBagConstraints.EAST;
+		gbc_lblArchivesFailed.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesFailed.gridx = 1;
+		gbc_lblArchivesFailed.gridy = 10;
+		panel_2.add(lblArchivesFailed, gbc_lblArchivesFailed);
+		
+		JLabel lblArchivesFailedCount = new JLabel("0");
+		GridBagConstraints gbc_lblArchivesFailedCount = new GridBagConstraints();
+		gbc_lblArchivesFailedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblArchivesFailedCount.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesFailedCount.gridx = 2;
+		gbc_lblArchivesFailedCount.gridy = 10;
+		panel_2.add(lblArchivesFailedCount, gbc_lblArchivesFailedCount);
+		
+		JLabel lblArchivesFailedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblArchivesFailedPercent = new GridBagConstraints();
+		gbc_lblArchivesFailedPercent.insets = new Insets(0, 0, 5, 5);
+		gbc_lblArchivesFailedPercent.gridx = 3;
+		gbc_lblArchivesFailedPercent.gridy = 10;
+		panel_2.add(lblArchivesFailedPercent, gbc_lblArchivesFailedPercent);
+		
+		JLabel lblResourcesFailed = new JLabel("Resources Failed:");
+		GridBagConstraints gbc_lblResourcesFailed = new GridBagConstraints();
+		gbc_lblResourcesFailed.anchor = GridBagConstraints.EAST;
+		gbc_lblResourcesFailed.insets = new Insets(0, 0, 0, 5);
+		gbc_lblResourcesFailed.gridx = 1;
+		gbc_lblResourcesFailed.gridy = 11;
+		panel_2.add(lblResourcesFailed, gbc_lblResourcesFailed);
+		
+		JLabel lblResourcesFailedCount = new JLabel("0");
+		GridBagConstraints gbc_lblResourcesFailedCount = new GridBagConstraints();
+		gbc_lblResourcesFailedCount.anchor = GridBagConstraints.WEST;
+		gbc_lblResourcesFailedCount.insets = new Insets(0, 0, 0, 5);
+		gbc_lblResourcesFailedCount.gridx = 2;
+		gbc_lblResourcesFailedCount.gridy = 11;
+		panel_2.add(lblResourcesFailedCount, gbc_lblResourcesFailedCount);
+		
+		JLabel lblResourcesFailedPercent = new JLabel("0%");
+		GridBagConstraints gbc_lblResourcesFailedPercent = new GridBagConstraints();
+		gbc_lblResourcesFailedPercent.insets = new Insets(0, 0, 0, 5);
+		gbc_lblResourcesFailedPercent.gridx = 3;
+		gbc_lblResourcesFailedPercent.gridy = 11;
+		panel_2.add(lblResourcesFailedPercent, gbc_lblResourcesFailedPercent);
 	}
 	
 	private BatchRunner genCopyBatches() {
