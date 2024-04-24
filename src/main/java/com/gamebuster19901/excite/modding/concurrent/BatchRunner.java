@@ -5,14 +5,14 @@ import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
 
-public class BatchRunner implements BatchWorker {
+public class BatchRunner<T> implements BatchWorker<T> {
 
 	private final String name;
 	private final ExecutorService executor;
-	private final LinkedHashSet<Batcher> batches = new LinkedHashSet<Batcher>();
+	private final LinkedHashSet<Batcher<T>> batches = new LinkedHashSet<Batcher<T>>();
 	private volatile boolean started = false;
+	private volatile boolean listenerAdded = false;
 	
     public BatchRunner(String name) {
     	this(name, Runtime.getRuntime().availableProcessors());
@@ -33,8 +33,11 @@ public class BatchRunner implements BatchWorker {
 	}
 
 	@Override
-	public void addBatch(Batcher batcher) {
+	public void addBatch(Batcher<T> batcher) {
 		synchronized(executor) {
+			if(listenerAdded) {
+				throw new IllegalStateException("Cannot add a batch after a BatchListener has been added! Add all batches before adding listeners!");
+			}
 			if(executor.isShutdown()) {
 				throw new IllegalStateException("Cannot add more batches after the batch runner has shut down!");
 			}
@@ -69,17 +72,17 @@ public class BatchRunner implements BatchWorker {
         	executor.awaitTermination(5, TimeUnit.SECONDS);
         }
         finally {
-	        for(Batcher batch : batches) {
+	        for(Batcher<T> batch : batches) {
 	        	batch.shutdownNow();
 	        }
         }
 	}
 
 	@Override
-	public Collection<BatchedCallable> getRunnables() {
+	public Collection<Batch<T>.BatchedCallable> getRunnables() {
 		synchronized(batches) {
-			LinkedHashSet<BatchedCallable> ret = new LinkedHashSet<>();
-			for(Batcher batch : batches) {
+			LinkedHashSet<Batch<T>.BatchedCallable> ret = new LinkedHashSet<>();
+			for(Batcher<T> batch : batches) {
 				ret.addAll(batch.getRunnables());
 			}
 			return ret;
@@ -90,21 +93,31 @@ public class BatchRunner implements BatchWorker {
 	public Collection<BatchListener> getListeners() {
 		synchronized(batches) {
 			LinkedHashSet<BatchListener> ret = new LinkedHashSet<>();
-			for(Batcher batch : batches) {
+			for(Batcher<T> batch : batches) {
 				ret.addAll(batch.getListeners());
 			}
 			return ret;
 		}
 	}
 	
-	public Collection<Batcher> getBatches() {
-		return (Collection<Batcher>) batches.clone();
+	@Override
+	public void addBatchListener(BatchListener listener) {
+		if(!listenerAdded) {
+			listenerAdded = true;
+		}
+		for(Batcher<T> batch : batches) {
+			batch.addListener(listener);
+		}
+	}
+	
+	public Collection<Batcher<T>> getBatches() {
+		return (Collection<Batcher<T>>) batches.clone();
 	}
 
 	public int getCompleted() {
 		int ret = 0;
-		Collection<BatchedCallable> callables = getRunnables();
-		for(BatchedCallable callable : callables) {ret++;}
+		Collection<Batch<T>.BatchedCallable> callables = getRunnables();
+		for(Batch<T>.BatchedCallable callable : callables) {ret++;}
 		return ret;
 	}
 	

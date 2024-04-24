@@ -6,7 +6,13 @@ import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.io.File;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -24,6 +30,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
@@ -31,6 +38,7 @@ import javax.swing.JSlider;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.awt.GridBagLayout;
@@ -45,8 +53,8 @@ public class Window implements BatchListener, MouseWheelListener {
 	}
 	
 	private JFrame frame;
-	private JTextField textField;
-	private JTextField textField_1;
+	private JTextField textFieldDestDir;
+	private JTextField textFieldSourceDir;
 	private JSlider threadSlider;
 	private JLabel lblThreads;
 	private static Window window;
@@ -55,12 +63,12 @@ public class Window implements BatchListener, MouseWheelListener {
 	private final FixedCellGrid gridPanel = genGridPanel();
 	private JTable table;
 	
-	private BatchRunner copyOperations;
+	private BatchRunner<Void> copyOperations;
 	private BatchRunner processOperations;
 
+
 	/**
-	 * Launch the application.
-	 * @throws InterruptedException 
+	 * @wbp.parser.entryPoint
 	 */
 	public static void main(String[] args) throws InterruptedException {
 
@@ -86,24 +94,21 @@ public class Window implements BatchListener, MouseWheelListener {
 	}
 
 	/**
-	 * Initialize the contents of the frame.
-	 * @throws InterruptedException 
+	 * @wbp.parser.entryPoint
 	 */
 	private void initialize() throws InterruptedException {
 		
-		copyOperations = genCopyBatches();
-		
+		copyOperations = genCopyBatches(null);
 		setupFrame();
-		setupTabbedPane();
 	}
 	
 	private void setupFrame() {
-		frame = new JFrame();
+		frame = new JFrame(); // @wbp.parser.preferredRoot
 		frame.setTitle("ExciteModder");
 		frame.setBounds(100, 100, 1000, 680);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
-		//frame.setResizable(false);
+		frame.setResizable(false);
 		frame.setVisible(true);
 		
 		JLabel lblUnmoddedDirectory = new JLabel("Source Directory:");
@@ -116,19 +121,40 @@ public class Window implements BatchListener, MouseWheelListener {
 		lblModdedDirectory.setBounds(12, 39, 165, 15);
 		frame.getContentPane().add(lblModdedDirectory);
 		
-		textField = new JTextField();
-		textField.setBounds(171, 37, 578, 19);
-		frame.getContentPane().add(textField);
-		textField.setColumns(10);
+		textFieldSourceDir = new JTextField();
+		textFieldSourceDir.setColumns(10);
+		textFieldSourceDir.setBounds(171, 10, 578, 19);
+		frame.getContentPane().add(textFieldSourceDir);
 		
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(171, 10, 578, 19);
-		frame.getContentPane().add(textField_1);
+		textFieldDestDir = new JTextField();
+		textFieldDestDir.setBounds(171, 37, 578, 19);
+		frame.getContentPane().add(textFieldDestDir);
+		textFieldDestDir.setColumns(10);
 		
 		JButton btnChangeSource = new JButton("Change");
 		btnChangeSource.setToolTipText("Change where ExciteModder will copy the game files from");
 		btnChangeSource.setBounds(761, 9, 117, 19);
+		btnChangeSource.addActionListener((e) -> {
+			File f;
+			Path path = Path.of(textFieldSourceDir.getText().trim()).toAbsolutePath();
+			if(Files.exists(path)) {
+				f = path.toAbsolutePath().toFile();
+			}
+			else {
+				f = null;
+			}
+			
+			JFileChooser chooser = new JFileChooser(f);
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			int status = chooser.showOpenDialog(frame);
+			if(status == JFileChooser.APPROVE_OPTION) {
+				try {
+					selectSourceDirectory(chooser.getSelectedFile());
+				} catch (InvocationTargetException | InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 		frame.getContentPane().add(btnChangeSource);
 		
 		JButton btnChangeDest = new JButton("Change");
@@ -175,23 +201,40 @@ public class Window implements BatchListener, MouseWheelListener {
 		frame.getContentPane().add(btnExtract);
 		frame.validate();
 		frame.repaint();
-		tabbedPane.addMouseWheelListener(this);
+		//tabbedPane = setupTabbedPane(true);
+		//frame.add(setupTabbedPane(true)); //this line is necessary here so that the wbp parser can see that the tabbed pane is a subcomponent of the frame. It doesn't seem to recognize it as being so if it isn't manually added here, even though it's added in setupTabbedPane
 	}
 	
-	private void setupTabbedPane() {
-		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+	private void selectSourceDirectory(File selectedDir) throws InvocationTargetException, InterruptedException {
+		if(selectedDir != null) {
+			textFieldSourceDir.setText(selectedDir.getAbsolutePath());
+		}
+		else {
+			textFieldSourceDir.setText("");
+		}
 		
-		tabbedPane.setBounds(0, 129, 1000, 511);
-		frame.getContentPane().add(tabbedPane);
+		copyOperations.shutdownNow();
+		copyOperations = genCopyBatches(selectedDir);
+		setupTabbedPane(false);
+		update();
+	}
+
+	private void setupTabbedPane(boolean initialSetup) {
+		tabbedPane.removeAll();
+		if(initialSetup) {
+			tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+			tabbedPane.setBounds(0, 129, 1000, 511);
+			frame.getContentPane().add(tabbedPane);
+		}
 		
 		setupConsoleOutputTab();
 		setupStatusTab();
 		setupProgressTab();
 		
-		for(Batcher b : copyOperations.getBatches()) {
+		for(Batcher<Void> b : copyOperations.getBatches()) {
 			tabbedPane.addTab(b.getName(), null);
 		}
-		
+		return;
 	}
 	
 	private void setupConsoleOutputTab() {
@@ -204,14 +247,22 @@ public class Window implements BatchListener, MouseWheelListener {
 		System.setOut(new PrintStream(SplitOutputStream.splitSysOut(textPaneOutputStream)));
 		System.setErr(new PrintStream(SplitOutputStream.splitErrOut(textPaneOutputStream)));
 		
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		new Throwable().printStackTrace(pw);
+		textArea.setText(sw.toString());
+		
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		tabbedPane.addTab("Console Output", null, scrollPane, null);
+		tabbedPane.addTab("Console OutputT", null, scrollPane, null);
+		
+		
+
 	}
 	
 	public void setupStatusTab() {
 		tabbedPane.addTab("Status", null, gridPanel, null);
-		Iterator<Batcher> batches = copyOperations.getBatches().iterator();
+		Iterator<Batcher<Void>> batches = copyOperations.getBatches().iterator();
 		int i = 0;
 		while(batches.hasNext()) {
 			gridPanel.putComponent(i, new BatchOperationComponent(batches.next()));
@@ -231,14 +282,14 @@ public class Window implements BatchListener, MouseWheelListener {
 	}
 	
 	private void setupLeftProgressPane(JPanel progressPanel) {
-		JPanel panel_1 = new JPanel();
-		progressPanel.add(panel_1);
-		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[] {100, 0, 70, 90, 0, 0, 0};
-		gbl_panel_1.rowHeights = new int[] {0, 15, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0};
-		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		panel_1.setLayout(gbl_panel_1);
+		JPanel leftPanel = new JPanel();
+		progressPanel.add(leftPanel);
+		GridBagLayout gbl_leftPanel = new GridBagLayout();
+		gbl_leftPanel.columnWidths = new int[] {100, 0, 70, 90, 0, 0, 0};
+		gbl_leftPanel.rowHeights = new int[] {0, 15, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0};
+		gbl_leftPanel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_leftPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		leftPanel.setLayout(gbl_leftPanel);
 		
 		JLabel lblCopyOperation = new JLabel("Copy Operation");
 		GridBagConstraints gbc_lblCopyOperation = new GridBagConstraints();
@@ -246,7 +297,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblCopyOperation.insets = new Insets(0, 0, 5, 5);
 		gbc_lblCopyOperation.gridx = 0;
 		gbc_lblCopyOperation.gridy = 0;
-		panel_1.add(lblCopyOperation, gbc_lblCopyOperation);
+		leftPanel.add(lblCopyOperation, gbc_lblCopyOperation);
 		BatchOperationComponent allBatchesCopy = new BatchOperationComponent(copyOperations);
 		allBatchesCopy.setToolTipText("All Batches");
 		GridBagConstraints gbc_allBatches = new GridBagConstraints();
@@ -255,7 +306,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_allBatches.insets = new Insets(0, 0, 0, 0);
 		gbc_allBatches.gridx = 0;
 		gbc_allBatches.gridy = 1;
-		panel_1.add(allBatchesCopy, gbc_allBatches);
+		leftPanel.add(allBatchesCopy, gbc_allBatches);
 		
 		JSeparator separator_1 = new JSeparator();
 		GridBagConstraints gbc_separator_1 = new GridBagConstraints();
@@ -264,7 +315,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_separator_1.insets = new Insets(0, 0, 5, 5);
 		gbc_separator_1.gridx = 1;
 		gbc_separator_1.gridy = 0;
-		panel_1.add(separator_1, gbc_separator_1);
+		leftPanel.add(separator_1, gbc_separator_1);
 		
 		JLabel lblTotalArchives = new JLabel("Total Archives:");
 		lblTotalArchives.setHorizontalAlignment(SwingConstants.CENTER);
@@ -273,7 +324,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblTotalArchives.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblTotalArchives.gridx = 2;
 		gbc_lblTotalArchives.gridy = 1;
-		panel_1.add(lblTotalArchives, gbc_lblTotalArchives);
+		leftPanel.add(lblTotalArchives, gbc_lblTotalArchives);
 		
 		JLabel lblTotalArchivesCount = new JLabel("0");
 		GridBagConstraints gbc_lblTotalArchivesCount = new GridBagConstraints();
@@ -281,7 +332,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblTotalArchivesCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTotalArchivesCount.gridx = 3;
 		gbc_lblTotalArchivesCount.gridy = 1;
-		panel_1.add(lblTotalArchivesCount, gbc_lblTotalArchivesCount);
+		leftPanel.add(lblTotalArchivesCount, gbc_lblTotalArchivesCount);
 		
 		JLabel lblFoundResources = new JLabel("Total Resources:");
 		lblFoundResources.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -290,7 +341,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblFoundResources.insets = new Insets(0, 0, 5, 5);
 		gbc_lblFoundResources.gridx = 2;
 		gbc_lblFoundResources.gridy = 2;
-		panel_1.add(lblFoundResources, gbc_lblFoundResources);
+		leftPanel.add(lblFoundResources, gbc_lblFoundResources);
 		
 		JLabel lblTotalResourcesCount = new JLabel("0");
 		GridBagConstraints gbc_lblTotalResourcesCount = new GridBagConstraints();
@@ -298,7 +349,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblTotalResourcesCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTotalResourcesCount.gridx = 3;
 		gbc_lblTotalResourcesCount.gridy = 2;
-		panel_1.add(lblTotalResourcesCount, gbc_lblTotalResourcesCount);
+		leftPanel.add(lblTotalResourcesCount, gbc_lblTotalResourcesCount);
 		
 		JLabel lblArchivesCopied = new JLabel("Archives Copied:");
 		GridBagConstraints gbc_lblArchivesCopied = new GridBagConstraints();
@@ -306,7 +357,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesCopied.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesCopied.gridx = 2;
 		gbc_lblArchivesCopied.gridy = 4;
-		panel_1.add(lblArchivesCopied, gbc_lblArchivesCopied);
+		leftPanel.add(lblArchivesCopied, gbc_lblArchivesCopied);
 		
 		JLabel lblArchivesCopiedCount = new JLabel("0");
 		GridBagConstraints gbc_lblArchivesCopiedCount = new GridBagConstraints();
@@ -314,14 +365,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesCopiedCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesCopiedCount.gridx = 3;
 		gbc_lblArchivesCopiedCount.gridy = 4;
-		panel_1.add(lblArchivesCopiedCount, gbc_lblArchivesCopiedCount);
+		leftPanel.add(lblArchivesCopiedCount, gbc_lblArchivesCopiedCount);
 		
 		JLabel lblArchivesCopiedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblArchivesCopiedPercent = new GridBagConstraints();
 		gbc_lblArchivesCopiedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesCopiedPercent.gridx = 4;
 		gbc_lblArchivesCopiedPercent.gridy = 4;
-		panel_1.add(lblArchivesCopiedPercent, gbc_lblArchivesCopiedPercent);
+		leftPanel.add(lblArchivesCopiedPercent, gbc_lblArchivesCopiedPercent);
 		
 		JLabel lblResourcesCopied = new JLabel("Resources Copied:");
 		GridBagConstraints gbc_lblResourcesCopied = new GridBagConstraints();
@@ -329,7 +380,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesCopied.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesCopied.gridx = 2;
 		gbc_lblResourcesCopied.gridy = 5;
-		panel_1.add(lblResourcesCopied, gbc_lblResourcesCopied);
+		leftPanel.add(lblResourcesCopied, gbc_lblResourcesCopied);
 		
 		JLabel lblResourcesCopiedCount = new JLabel("0");
 		GridBagConstraints gbc_lblResourcesCopiedCount = new GridBagConstraints();
@@ -337,14 +388,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesCopiedCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesCopiedCount.gridx = 3;
 		gbc_lblResourcesCopiedCount.gridy = 5;
-		panel_1.add(lblResourcesCopiedCount, gbc_lblResourcesCopiedCount);
+		leftPanel.add(lblResourcesCopiedCount, gbc_lblResourcesCopiedCount);
 		
 		JLabel lblResourcesCopiedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblResourcesCopiedPercent = new GridBagConstraints();
 		gbc_lblResourcesCopiedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesCopiedPercent.gridx = 4;
 		gbc_lblResourcesCopiedPercent.gridy = 5;
-		panel_1.add(lblResourcesCopiedPercent, gbc_lblResourcesCopiedPercent);
+		leftPanel.add(lblResourcesCopiedPercent, gbc_lblResourcesCopiedPercent);
 		
 		JLabel lblArchivesSkipped = new JLabel("Archives Skipped:");
 		lblArchivesSkipped.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -353,7 +404,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesSkipped.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesSkipped.gridx = 2;
 		gbc_lblArchivesSkipped.gridy = 7;
-		panel_1.add(lblArchivesSkipped, gbc_lblArchivesSkipped);
+		leftPanel.add(lblArchivesSkipped, gbc_lblArchivesSkipped);
 		
 		JLabel lblArchivesSkippedCount = new JLabel("0");
 		GridBagConstraints gbc_lblArchivesSkippedCount = new GridBagConstraints();
@@ -361,14 +412,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesSkippedCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesSkippedCount.gridx = 3;
 		gbc_lblArchivesSkippedCount.gridy = 7;
-		panel_1.add(lblArchivesSkippedCount, gbc_lblArchivesSkippedCount);
+		leftPanel.add(lblArchivesSkippedCount, gbc_lblArchivesSkippedCount);
 		
 		JLabel lblArchivesSkippedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblArchivesSkippedPercent = new GridBagConstraints();
 		gbc_lblArchivesSkippedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesSkippedPercent.gridx = 4;
 		gbc_lblArchivesSkippedPercent.gridy = 7;
-		panel_1.add(lblArchivesSkippedPercent, gbc_lblArchivesSkippedPercent);
+		leftPanel.add(lblArchivesSkippedPercent, gbc_lblArchivesSkippedPercent);
 		
 		JLabel lblResourcesSkipped = new JLabel("Resources Skipped:");
 		GridBagConstraints gbc_lblResourcesSkipped = new GridBagConstraints();
@@ -376,7 +427,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesSkipped.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesSkipped.gridx = 2;
 		gbc_lblResourcesSkipped.gridy = 8;
-		panel_1.add(lblResourcesSkipped, gbc_lblResourcesSkipped);
+		leftPanel.add(lblResourcesSkipped, gbc_lblResourcesSkipped);
 		
 		JLabel lblResourcesSkippedCount = new JLabel("0");
 		GridBagConstraints gbc_lblResourcesSkippedCount = new GridBagConstraints();
@@ -384,14 +435,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesSkippedCount.anchor = GridBagConstraints.WEST;
 		gbc_lblResourcesSkippedCount.gridx = 3;
 		gbc_lblResourcesSkippedCount.gridy = 8;
-		panel_1.add(lblResourcesSkippedCount, gbc_lblResourcesSkippedCount);
+		leftPanel.add(lblResourcesSkippedCount, gbc_lblResourcesSkippedCount);
 		
 		JLabel labelResourcesSkippedPercent = new JLabel("0%");
 		GridBagConstraints gbc_labelResourcesSkippedPercent = new GridBagConstraints();
 		gbc_labelResourcesSkippedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_labelResourcesSkippedPercent.gridx = 4;
 		gbc_labelResourcesSkippedPercent.gridy = 8;
-		panel_1.add(labelResourcesSkippedPercent, gbc_labelResourcesSkippedPercent);
+		leftPanel.add(labelResourcesSkippedPercent, gbc_labelResourcesSkippedPercent);
 		
 		JLabel lblArchivesFailed = new JLabel("Archives Failed:");
 		lblArchivesFailed.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -400,7 +451,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesFailed.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesFailed.gridx = 2;
 		gbc_lblArchivesFailed.gridy = 10;
-		panel_1.add(lblArchivesFailed, gbc_lblArchivesFailed);
+		leftPanel.add(lblArchivesFailed, gbc_lblArchivesFailed);
 		
 		JLabel lblArchivesFailedCount = new JLabel("0");
 		GridBagConstraints gbc_lblArchivesFailedCount = new GridBagConstraints();
@@ -408,14 +459,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesFailedCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesFailedCount.gridx = 3;
 		gbc_lblArchivesFailedCount.gridy = 10;
-		panel_1.add(lblArchivesFailedCount, gbc_lblArchivesFailedCount);
+		leftPanel.add(lblArchivesFailedCount, gbc_lblArchivesFailedCount);
 		
 		JLabel lblArchivesFailedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblArchivesFailedPercent = new GridBagConstraints();
 		gbc_lblArchivesFailedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesFailedPercent.gridx = 4;
 		gbc_lblArchivesFailedPercent.gridy = 10;
-		panel_1.add(lblArchivesFailedPercent, gbc_lblArchivesFailedPercent);
+		leftPanel.add(lblArchivesFailedPercent, gbc_lblArchivesFailedPercent);
 		
 		JLabel lblResourcesFailed = new JLabel("Resources Failed:");
 		GridBagConstraints gbc_lblResourcesFailed = new GridBagConstraints();
@@ -423,7 +474,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesFailed.insets = new Insets(0, 0, 0, 5);
 		gbc_lblResourcesFailed.gridx = 2;
 		gbc_lblResourcesFailed.gridy = 11;
-		panel_1.add(lblResourcesFailed, gbc_lblResourcesFailed);
+		leftPanel.add(lblResourcesFailed, gbc_lblResourcesFailed);
 		
 		JLabel lblResourcesFailedCount = new JLabel("0");
 		GridBagConstraints gbc_lblResourcesFailedCount = new GridBagConstraints();
@@ -431,25 +482,33 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesFailedCount.insets = new Insets(0, 0, 0, 5);
 		gbc_lblResourcesFailedCount.gridx = 3;
 		gbc_lblResourcesFailedCount.gridy = 11;
-		panel_1.add(lblResourcesFailedCount, gbc_lblResourcesFailedCount);
+		leftPanel.add(lblResourcesFailedCount, gbc_lblResourcesFailedCount);
 		
 		JLabel lblResourcesFailedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblResourcesFailedPercent = new GridBagConstraints();
 		gbc_lblResourcesFailedPercent.insets = new Insets(0, 0, 0, 5);
 		gbc_lblResourcesFailedPercent.gridx = 4;
 		gbc_lblResourcesFailedPercent.gridy = 11;
-		panel_1.add(lblResourcesFailedPercent, gbc_lblResourcesFailedPercent);
+		leftPanel.add(lblResourcesFailedPercent, gbc_lblResourcesFailedPercent);
+		
+		copyOperations.addBatchListener(() -> {
+			SwingUtilities.invokeLater(() -> {
+				
+				//Set all of the label text
+				
+			});
+		});
 	}
 	
 	private void setupRightProgressPane(JPanel progressPanel) {
-		JPanel panel_2 = new JPanel();
-		progressPanel.add(panel_2);
-		GridBagLayout gbl_panel_2 = new GridBagLayout();
-		gbl_panel_2.columnWidths = new int[] {30, 0, 90, 0, 30, 30, 0, 0};
-		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		panel_2.setLayout(gbl_panel_2);
+		JPanel rightPanel = new JPanel();
+		progressPanel.add(rightPanel);
+		GridBagLayout gbl_rightPanel = new GridBagLayout();
+		gbl_rightPanel.columnWidths = new int[] {30, 0, 90, 0, 30, 30, 0, 0};
+		gbl_rightPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_rightPanel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_rightPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		rightPanel.setLayout(gbl_rightPanel);
 		
 		JLabel lblNewLabel = new JLabel("Process Operation");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -457,7 +516,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 0;
-		panel_2.add(lblNewLabel, gbc_lblNewLabel);
+		rightPanel.add(lblNewLabel, gbc_lblNewLabel);
 		
 		JLabel lblTotalArchives = new JLabel("Total Archives:");
 		GridBagConstraints gbc_lblTotalArchives = new GridBagConstraints();
@@ -465,7 +524,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblTotalArchives.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTotalArchives.gridx = 1;
 		gbc_lblTotalArchives.gridy = 1;
-		panel_2.add(lblTotalArchives, gbc_lblTotalArchives);
+		rightPanel.add(lblTotalArchives, gbc_lblTotalArchives);
 		
 		JLabel lblTotalArchvesCount = new JLabel("0");
 		GridBagConstraints gbc_lblTotalArchvesCount = new GridBagConstraints();
@@ -473,7 +532,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblTotalArchvesCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTotalArchvesCount.gridx = 2;
 		gbc_lblTotalArchvesCount.gridy = 1;
-		panel_2.add(lblTotalArchvesCount, gbc_lblTotalArchvesCount);
+		rightPanel.add(lblTotalArchvesCount, gbc_lblTotalArchvesCount);
 		
 		JLabel lblTotalResources = new JLabel("Total Resources:");
 		GridBagConstraints gbc_lblTotalResources = new GridBagConstraints();
@@ -481,7 +540,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblTotalResources.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTotalResources.gridx = 1;
 		gbc_lblTotalResources.gridy = 2;
-		panel_2.add(lblTotalResources, gbc_lblTotalResources);
+		rightPanel.add(lblTotalResources, gbc_lblTotalResources);
 		
 		JLabel lblTotalResourcesCount = new JLabel("0");
 		GridBagConstraints gbc_lblTotalResourcesCount = new GridBagConstraints();
@@ -489,7 +548,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblTotalResourcesCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTotalResourcesCount.gridx = 2;
 		gbc_lblTotalResourcesCount.gridy = 2;
-		panel_2.add(lblTotalResourcesCount, gbc_lblTotalResourcesCount);
+		rightPanel.add(lblTotalResourcesCount, gbc_lblTotalResourcesCount);
 		
 		JLabel lblArchivesProcessed = new JLabel("Archives Processed:");
 		GridBagConstraints gbc_lblArchivesProcessed = new GridBagConstraints();
@@ -497,7 +556,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesProcessed.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesProcessed.gridx = 1;
 		gbc_lblArchivesProcessed.gridy = 4;
-		panel_2.add(lblArchivesProcessed, gbc_lblArchivesProcessed);
+		rightPanel.add(lblArchivesProcessed, gbc_lblArchivesProcessed);
 		lblArchivesProcessed.setHorizontalAlignment(SwingConstants.RIGHT);
 		
 		JLabel lblArchivesProcessedCount = new JLabel("0");
@@ -506,14 +565,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesProcessedCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesProcessedCount.gridx = 2;
 		gbc_lblArchivesProcessedCount.gridy = 4;
-		panel_2.add(lblArchivesProcessedCount, gbc_lblArchivesProcessedCount);
+		rightPanel.add(lblArchivesProcessedCount, gbc_lblArchivesProcessedCount);
 		
 		JLabel lblArchivesProcessedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblArchivesProcessedPercent = new GridBagConstraints();
 		gbc_lblArchivesProcessedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesProcessedPercent.gridx = 3;
 		gbc_lblArchivesProcessedPercent.gridy = 4;
-		panel_2.add(lblArchivesProcessedPercent, gbc_lblArchivesProcessedPercent);
+		rightPanel.add(lblArchivesProcessedPercent, gbc_lblArchivesProcessedPercent);
 		
 		JLabel lblResourcesProcessed = new JLabel("Resources Processed:");
 		GridBagConstraints gbc_lblResourcesProcessed = new GridBagConstraints();
@@ -521,7 +580,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesProcessed.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesProcessed.gridx = 1;
 		gbc_lblResourcesProcessed.gridy = 5;
-		panel_2.add(lblResourcesProcessed, gbc_lblResourcesProcessed);
+		rightPanel.add(lblResourcesProcessed, gbc_lblResourcesProcessed);
 		
 		JLabel lblResourcesProcessedCount = new JLabel("0");
 		GridBagConstraints gbc_lblResourcesProcessedCount = new GridBagConstraints();
@@ -529,14 +588,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesProcessedCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesProcessedCount.gridx = 2;
 		gbc_lblResourcesProcessedCount.gridy = 5;
-		panel_2.add(lblResourcesProcessedCount, gbc_lblResourcesProcessedCount);
+		rightPanel.add(lblResourcesProcessedCount, gbc_lblResourcesProcessedCount);
 		
 		JLabel lblResourcesProcessedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblResourcesProcessedPercent = new GridBagConstraints();
 		gbc_lblResourcesProcessedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesProcessedPercent.gridx = 3;
 		gbc_lblResourcesProcessedPercent.gridy = 5;
-		panel_2.add(lblResourcesProcessedPercent, gbc_lblResourcesProcessedPercent);
+		rightPanel.add(lblResourcesProcessedPercent, gbc_lblResourcesProcessedPercent);
 		
 		JLabel lblArchivesSkipped = new JLabel("Archives Skipped:");
 		GridBagConstraints gbc_lblArchivesSkipped = new GridBagConstraints();
@@ -544,7 +603,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesSkipped.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesSkipped.gridx = 1;
 		gbc_lblArchivesSkipped.gridy = 7;
-		panel_2.add(lblArchivesSkipped, gbc_lblArchivesSkipped);
+		rightPanel.add(lblArchivesSkipped, gbc_lblArchivesSkipped);
 		
 		JLabel lblArchivesSkippedCount = new JLabel("0");
 		GridBagConstraints gbc_lblArchivesSkippedCount = new GridBagConstraints();
@@ -552,14 +611,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesSkippedCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesSkippedCount.gridx = 2;
 		gbc_lblArchivesSkippedCount.gridy = 7;
-		panel_2.add(lblArchivesSkippedCount, gbc_lblArchivesSkippedCount);
+		rightPanel.add(lblArchivesSkippedCount, gbc_lblArchivesSkippedCount);
 		
 		JLabel lblArchivesSkippedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblArchivesSkippedPercent = new GridBagConstraints();
 		gbc_lblArchivesSkippedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesSkippedPercent.gridx = 3;
 		gbc_lblArchivesSkippedPercent.gridy = 7;
-		panel_2.add(lblArchivesSkippedPercent, gbc_lblArchivesSkippedPercent);
+		rightPanel.add(lblArchivesSkippedPercent, gbc_lblArchivesSkippedPercent);
 		
 		JLabel lblResourcesSkipped = new JLabel("Resources Skipped:");
 		GridBagConstraints gbc_lblResourcesSkipped = new GridBagConstraints();
@@ -567,7 +626,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesSkipped.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesSkipped.gridx = 1;
 		gbc_lblResourcesSkipped.gridy = 8;
-		panel_2.add(lblResourcesSkipped, gbc_lblResourcesSkipped);
+		rightPanel.add(lblResourcesSkipped, gbc_lblResourcesSkipped);
 		
 		JLabel lblResourcesSkippedCount = new JLabel("0");
 		GridBagConstraints gbc_lblResourcesSkippedCount = new GridBagConstraints();
@@ -575,14 +634,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesSkippedCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesSkippedCount.gridx = 2;
 		gbc_lblResourcesSkippedCount.gridy = 8;
-		panel_2.add(lblResourcesSkippedCount, gbc_lblResourcesSkippedCount);
+		rightPanel.add(lblResourcesSkippedCount, gbc_lblResourcesSkippedCount);
 		
 		JLabel lblResourcesSkippedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblResourcesSkippedPercent = new GridBagConstraints();
 		gbc_lblResourcesSkippedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcesSkippedPercent.gridx = 3;
 		gbc_lblResourcesSkippedPercent.gridy = 8;
-		panel_2.add(lblResourcesSkippedPercent, gbc_lblResourcesSkippedPercent);
+		rightPanel.add(lblResourcesSkippedPercent, gbc_lblResourcesSkippedPercent);
 		
 		JLabel lblArchivesFailed = new JLabel("Archives Failed:");
 		GridBagConstraints gbc_lblArchivesFailed = new GridBagConstraints();
@@ -590,7 +649,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesFailed.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesFailed.gridx = 1;
 		gbc_lblArchivesFailed.gridy = 10;
-		panel_2.add(lblArchivesFailed, gbc_lblArchivesFailed);
+		rightPanel.add(lblArchivesFailed, gbc_lblArchivesFailed);
 		
 		JLabel lblArchivesFailedCount = new JLabel("0");
 		GridBagConstraints gbc_lblArchivesFailedCount = new GridBagConstraints();
@@ -598,14 +657,14 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblArchivesFailedCount.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesFailedCount.gridx = 2;
 		gbc_lblArchivesFailedCount.gridy = 10;
-		panel_2.add(lblArchivesFailedCount, gbc_lblArchivesFailedCount);
+		rightPanel.add(lblArchivesFailedCount, gbc_lblArchivesFailedCount);
 		
 		JLabel lblArchivesFailedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblArchivesFailedPercent = new GridBagConstraints();
 		gbc_lblArchivesFailedPercent.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArchivesFailedPercent.gridx = 3;
 		gbc_lblArchivesFailedPercent.gridy = 10;
-		panel_2.add(lblArchivesFailedPercent, gbc_lblArchivesFailedPercent);
+		rightPanel.add(lblArchivesFailedPercent, gbc_lblArchivesFailedPercent);
 		
 		JLabel lblResourcesFailed = new JLabel("Resources Failed:");
 		GridBagConstraints gbc_lblResourcesFailed = new GridBagConstraints();
@@ -613,7 +672,7 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesFailed.insets = new Insets(0, 0, 0, 5);
 		gbc_lblResourcesFailed.gridx = 1;
 		gbc_lblResourcesFailed.gridy = 11;
-		panel_2.add(lblResourcesFailed, gbc_lblResourcesFailed);
+		rightPanel.add(lblResourcesFailed, gbc_lblResourcesFailed);
 		
 		JLabel lblResourcesFailedCount = new JLabel("0");
 		GridBagConstraints gbc_lblResourcesFailedCount = new GridBagConstraints();
@@ -621,21 +680,23 @@ public class Window implements BatchListener, MouseWheelListener {
 		gbc_lblResourcesFailedCount.insets = new Insets(0, 0, 0, 5);
 		gbc_lblResourcesFailedCount.gridx = 2;
 		gbc_lblResourcesFailedCount.gridy = 11;
-		panel_2.add(lblResourcesFailedCount, gbc_lblResourcesFailedCount);
+		rightPanel.add(lblResourcesFailedCount, gbc_lblResourcesFailedCount);
 		
 		JLabel lblResourcesFailedPercent = new JLabel("0%");
 		GridBagConstraints gbc_lblResourcesFailedPercent = new GridBagConstraints();
 		gbc_lblResourcesFailedPercent.insets = new Insets(0, 0, 0, 5);
 		gbc_lblResourcesFailedPercent.gridx = 3;
 		gbc_lblResourcesFailedPercent.gridy = 11;
-		panel_2.add(lblResourcesFailedPercent, gbc_lblResourcesFailedPercent);
+		rightPanel.add(lblResourcesFailedPercent, gbc_lblResourcesFailedPercent);
 	}
 	
-	private BatchRunner genCopyBatches() {
+	private BatchRunner genCopyBatches(File dir) {
 		BatchRunner batchRunner = new BatchRunner("Copy Operations");
-		for(int i = 0; i < 10; i++) {
-			Batch b = new Batch("File " + i);
-			batchRunner.addBatch(b);
+		if(dir != null) {
+			for(File f : dir.listFiles()) {
+				Batch b = new Batch(f.getName());
+				batchRunner.addBatch(b);
+			}
 		}
 		return batchRunner;
 	}
@@ -658,6 +719,8 @@ public class Window implements BatchListener, MouseWheelListener {
 	
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
+		System.out.println("Scrolled: " + e.getComponent());
+		System.out.println("Child: " + e.getComponent().getComponentAt(e.getPoint()));
 		if(e.getSource() instanceof JTabbedPane) {
 			JTabbedPane pane = (JTabbedPane) e.getSource();
 			Component scrolledComponent = pane.getComponentAt(e.getPoint());

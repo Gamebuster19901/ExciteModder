@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import static java.lang.Thread.State;
 
-public class Batch implements Batcher {
+public class Batch<T> implements Batcher<T> {
 
 	private final String name;
     private final Set<BatchedCallable> runnables = new HashSet<>();
@@ -25,7 +25,7 @@ public class Batch implements Batcher {
     }
     
     @Override
-    public void addRunnable(Callable<Void> runnable) {
+    public void addRunnable(Callable<T> runnable) {
     	if(accepting) {
 	    	BatchedCallable b = new BatchedCallable(runnable);
 	    	runnables.add(new BatchedCallable(runnable));
@@ -91,9 +91,9 @@ public class Batch implements Batcher {
     	throw new IllegalStateException("Batch is not accepting new tasks or listeners.");
     }
     
-    public class BatchedCallable implements Callable<Void> {
+    public class BatchedCallable implements Callable<T> {
     	
-    	private final Callable<Void> child;
+    	private final Callable<T> child;
     	private volatile SoftReference<Thread> threadRef;
     	protected volatile Throwable thrown;
     	protected volatile boolean finished = false;
@@ -105,13 +105,13 @@ public class Batch implements Batcher {
     		});
     	}
     	
-    	public BatchedCallable(Callable<Void> c) {
+    	public BatchedCallable(Callable<T> c) {
     		this.child = c;
     		updateListeners();
     	}
     	
     	@Override
-		public Void call() {
+		public T call() {
 			Thread thread;
 			try {
 				thread = Thread.currentThread();

@@ -2,13 +2,11 @@ package com.gamebuster19901.excite.modding.concurrent;
 
 import java.util.Collection;
 
-import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
-
-public interface BatchContainer {
+public interface BatchContainer<T> {
 	
 	public abstract String getName();
 
-	public Collection<BatchedCallable> getRunnables();
+	public Collection<Batch<T>.BatchedCallable> getRunnables();
 	
 	public Collection<BatchListener> getListeners();
 	
