@@ -8,11 +8,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 public class FileUtils {
 
@@ -118,6 +122,45 @@ public class FileUtils {
 		} else {
 			System.out.println("The specified path does not exist: " + path);
 		}
+	}
+	
+	public static LinkedHashSet<Path> getFilesRecursively(Path path) throws IOException {
+		LinkedHashSet<Path> paths = new LinkedHashSet<>();
+		if (Files.exists(path)) {
+			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					paths.add(file);
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					if (Files.isSymbolicLink(dir)) {
+						//skip symbolic links
+						return FileVisitResult.SKIP_SUBTREE;
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} else {
+			System.out.println("The specified path does not exist: " + path);
+		}
+		return paths;
+	}
+	
+	public static String getFileName(Path f) {
+		 String fileName = f.getFileName().toString();
+		 int i = fileName.lastIndexOf('.');
+		 return (i == -1) ? fileName : fileName.substring(0, i);
+	}
+
+	public static boolean isDirectory(Path dir) {
+		return Files.isDirectory(dir) && !Files.isSymbolicLink(dir);
+	}
+	
+	public static boolean isDirectory(File dir) {
+		return isDirectory(dir.getAbsoluteFile().toPath());
 	}
 	
 }

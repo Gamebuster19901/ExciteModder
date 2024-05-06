@@ -3,6 +3,8 @@ package com.gamebuster19901.excite.modding.concurrent;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
+import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
+
 public interface BatchWorker<T> extends BatchContainer<T> {
 	
 	public abstract void addBatch(Batcher<T> batcher);
@@ -13,7 +15,7 @@ public interface BatchWorker<T> extends BatchContainer<T> {
 	
 	public void shutdownNow() throws InterruptedException;
 	
-	public Collection<Batch<T>.BatchedCallable> getRunnables();
+	public Collection<BatchedCallable<T>> getRunnables();
 	
 	public Collection<BatchListener> getListeners();
 	

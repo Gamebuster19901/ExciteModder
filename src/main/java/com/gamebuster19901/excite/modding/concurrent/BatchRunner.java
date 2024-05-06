@@ -6,6 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
+
 public class BatchRunner<T> implements BatchWorker<T> {
 
 	private final String name;
@@ -55,7 +57,9 @@ public class BatchRunner<T> implements BatchWorker<T> {
 			}
 			synchronized(batches) {
 				started = true;
-				executor.invokeAll(getRunnables());
+				for(Batcher<T> batch : batches) {
+					executor.invokeAll(batch.getRunnables());
+				}
 			}
 		}
 	}
@@ -79,9 +83,9 @@ public class BatchRunner<T> implements BatchWorker<T> {
 	}
 
 	@Override
-	public Collection<Batch<T>.BatchedCallable> getRunnables() {
+	public Collection<BatchedCallable<T>> getRunnables() {
 		synchronized(batches) {
-			LinkedHashSet<Batch<T>.BatchedCallable> ret = new LinkedHashSet<>();
+			LinkedHashSet<BatchedCallable<T>> ret = new LinkedHashSet<>();
 			for(Batcher<T> batch : batches) {
 				ret.addAll(batch.getRunnables());
 			}
@@ -116,8 +120,8 @@ public class BatchRunner<T> implements BatchWorker<T> {
 
 	public int getCompleted() {
 		int ret = 0;
-		Collection<Batch<T>.BatchedCallable> callables = getRunnables();
-		for(Batch<T>.BatchedCallable callable : callables) {ret++;}
+		Collection<BatchedCallable<T>> callables = getRunnables();
+		for(BatchedCallable<T> callable : callables) {ret++;}
 		return ret;
 	}
 	

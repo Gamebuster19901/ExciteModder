@@ -24,7 +24,7 @@ build/tmp
 hs_err_pid*.log
 
 #Run
-/run
+/run*
 /backups
 
 # output
