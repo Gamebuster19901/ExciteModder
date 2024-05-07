@@ -10,6 +10,7 @@ import java.util.Collection;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 public class BatchOperationComponent extends JPanel implements BatchContainer {
 	
@@ -53,6 +54,16 @@ public class BatchOperationComponent extends JPanel implements BatchContainer {
 	@Override
 	public Collection<BatchListener> getListeners() {
 		return batch.getListeners();
+	}
+
+	@Override
+	public void update() {
+		SwingUtilities.invokeLater(() -> {
+			batch.update();
+			revalidate();
+			repaint();
+		});
+
 	}
 	
 }

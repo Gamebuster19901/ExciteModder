@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
 
-public interface BatchContainer<T> {
+public interface BatchContainer<T> extends BatchListener {
 	
 	public abstract String getName();
 

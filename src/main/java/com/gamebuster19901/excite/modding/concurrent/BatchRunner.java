@@ -84,24 +84,20 @@ public class BatchRunner<T> implements BatchWorker<T> {
 
 	@Override
 	public Collection<BatchedCallable<T>> getRunnables() {
-		synchronized(batches) {
-			LinkedHashSet<BatchedCallable<T>> ret = new LinkedHashSet<>();
-			for(Batcher<T> batch : batches) {
-				ret.addAll(batch.getRunnables());
-			}
-			return ret;
+		LinkedHashSet<BatchedCallable<T>> ret = new LinkedHashSet<>();
+		for(Batcher<T> batch : batches) {
+			ret.addAll(batch.getRunnables());
 		}
+		return ret;
 	}
 
 	@Override
 	public Collection<BatchListener> getListeners() {
-		synchronized(batches) {
-			LinkedHashSet<BatchListener> ret = new LinkedHashSet<>();
-			for(Batcher<T> batch : batches) {
-				ret.addAll(batch.getListeners());
-			}
-			return ret;
+		LinkedHashSet<BatchListener> ret = new LinkedHashSet<>();
+		for(Batcher<T> batch : batches) {
+			ret.addAll(batch.getListeners());
 		}
+		return ret;
 	}
 	
 	@Override
@@ -123,6 +119,11 @@ public class BatchRunner<T> implements BatchWorker<T> {
 		Collection<BatchedCallable<T>> callables = getRunnables();
 		for(BatchedCallable<T> callable : callables) {ret++;}
 		return ret;
+	}
+
+	@Override
+	public void update() {
+		//NO-OP
 	}
 	
 }

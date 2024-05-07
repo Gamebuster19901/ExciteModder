@@ -233,4 +233,9 @@ public class Batch<T> implements Batcher<T> {
 			thrown = shutdown;
 		}
     }
+
+	@Override
+	public void update() {
+		//NO-OP
+	}
  }

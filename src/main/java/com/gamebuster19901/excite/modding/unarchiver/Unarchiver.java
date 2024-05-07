@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import com.gamebuster19901.excite.modding.concurrent.Batch;
 import com.gamebuster19901.excite.modding.game.file.kaitai.TocMonster.Details;
+import com.gamebuster19901.excite.modding.util.FileUtils;
 
 public class Unarchiver {
 
@@ -69,6 +70,10 @@ public class Unarchiver {
 			});
 		}
 		return batch;
+	}
+	
+	public boolean isValid() {
+		return FileUtils.isDirectory(sourceDir) && FileUtils.isDirectory(destDir);
 	}
 	
 	private QuickAccessArchive getArchive(Toc toc) throws IOException {

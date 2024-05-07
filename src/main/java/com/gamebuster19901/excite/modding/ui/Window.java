@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -60,8 +60,9 @@ public class Window implements BatchListener {
 	private JTextField textFieldSource;
 	private JTextField textFieldDest;
 	
-	private BatchRunner<Callable<Void>> copyOperations;
-	private BatchRunner<Void> processOperations;
+	private volatile Unarchiver unarchiver;
+	private volatile BatchRunner<Callable<Void>> copyOperations;
+	private volatile BatchRunner<Void> processOperations;
 
 	/**
 	 * Launch the application.
@@ -89,9 +90,11 @@ public class Window implements BatchListener {
 
 	/**
 	 * Initialize the contents of the frame.
+	 * @throws IOException 
 	 */
 	private void initialize() {
-		copyOperations = genCopyBatches(null, null);
+		unarchiver = genUnarchiver(null, null);
+		copyOperations = genCopyBatches();
 		processOperations = genProcessBatches(null);
 		
 		frame = new JFrame();
@@ -268,13 +271,21 @@ public class Window implements BatchListener {
 						throw new NotDirectoryException(folder.getAbsolutePath().toString());
 					}
 					if(paths.size() != 0) {
-						int result = JOptionPane.showOptionDialog(frame, "Are you sure? You will overwrite " + paths.size() + " files.", "Overwrite?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+						int result = JOptionPane.showOptionDialog(frame, "Are you sure? This directory has " + paths.size() + " pre-existing files.\n\nDuplicates will be overridden", "Overwrite?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
 						if(result != 0) {
 							return;
 						}
+						
+						new Thread(() -> {
+							try {
+								copyOperations.startBatch();
+							} catch (InterruptedException e1) {
+								throw new RuntimeException(e1);
+							}
+						}).start();
+						
 					}
 				}
-				
 				
 				
 			}
@@ -300,7 +311,8 @@ public class Window implements BatchListener {
 		}
 		
 		copyOperations.shutdownNow();
-		copyOperations = genCopyBatches(sourceDir, destDir);
+		unarchiver = genUnarchiver(sourceDir, destDir);
+		copyOperations = genCopyBatches();
 		setupTabbedPane(pane);
 		pane.setSelectedTab(tab);
 		System.out.println("Set tab!");
@@ -731,14 +743,25 @@ public class Window implements BatchListener {
 		rightPanel.add(lblResourcesFailedPercent, gbc_lblResourcesFailedPercent);
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private BatchRunner<Callable<Void>> genCopyBatches(File source, File dest) {
-		BatchRunner<Callable<Void>> batchRunner = new BatchRunner("Unarchive");
+	private Unarchiver genUnarchiver(File source, File dest) {
 		try {
 			Unarchiver unarchiver = new Unarchiver(source.toPath(), dest.toPath());
-			if(FileUtils.isDirectory(source) && FileUtils.isDirectory(dest)) {
-				for(Batch<Callable<Void>> batch : unarchiver.getCopyBatches()) {
-					batchRunner.addBatch(batch);
+			return unarchiver;
+		}
+		catch(Throwable t) {
+			return null;
+		}
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private BatchRunner<Callable<Void>> genCopyBatches() {
+		BatchRunner<Callable<Void>> batchRunner = new BatchRunner("Unarchive");
+		try {
+			if(unarchiver != null) {
+				if(unarchiver.isValid()) {
+					for(Batch<Callable<Void>> batch : unarchiver.getCopyBatches()) {
+						batchRunner.addBatch(batch);
+					}
 				}
 			}
 		}

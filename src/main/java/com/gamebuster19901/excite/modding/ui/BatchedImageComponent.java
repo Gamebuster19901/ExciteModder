@@ -19,6 +19,7 @@ public class BatchedImageComponent extends ImageComponent implements BatchContai
 	
 	@Override
 	public Image getImage() {
+		System.out.println("Image");
 		int _new = 0;
         int working = 0;
         int success = 0;
@@ -64,6 +65,12 @@ public class BatchedImageComponent extends ImageComponent implements BatchContai
 	@Override
 	public Collection<BatchListener> getListeners() {
 		return batch.getListeners();
+	}
+
+	@Override
+	public void update() {
+		revalidate();
+		repaint();
 	}
 	
 }
