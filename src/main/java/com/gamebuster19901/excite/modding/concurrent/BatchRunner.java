@@ -1,6 +1,8 @@
 package com.gamebuster19901.excite.modding.concurrent;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,9 +59,9 @@ public class BatchRunner<T> implements BatchWorker<T>, BatcherContainer<T> {
 			}
 			synchronized(batches) {
 				started = true;
-				for(Batcher<T> batch : batches) {
-					executor.invokeAll(batch.getRunnables());
-				}
+				ArrayList<BatchedCallable<T>> batchers = new ArrayList<>(getRunnables());
+				Collections.shuffle(batchers); //So multiple threads don't wait for a single archive to lazily load, allows multiple archives to lazily load at a time
+				executor.invokeAll(batchers);
 			}
 		}
 	}
@@ -113,13 +115,6 @@ public class BatchRunner<T> implements BatchWorker<T>, BatcherContainer<T> {
 	@Override
 	public Collection<Batcher<T>> getBatches() {
 		return (Collection<Batcher<T>>) batches.clone();
-	}
-
-	public int getCompleted() {
-		int ret = 0;
-		Collection<BatchedCallable<T>> callables = getRunnables();
-		for(BatchedCallable<T> callable : callables) {ret++;}
-		return ret;
 	}
 	
 }

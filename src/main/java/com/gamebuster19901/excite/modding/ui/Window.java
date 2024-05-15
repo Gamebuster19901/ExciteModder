@@ -65,6 +65,7 @@ public class Window implements BatchListener {
 	private JFrame frame;
 	private JTextField textFieldSource;
 	private JTextField textFieldDest;
+	private JSlider threadSlider;
 	
 	private volatile Unarchiver unarchiver;
 	private volatile BatchRunner<Pair<DecisionType, Callable<Void>>> copyOperations;
@@ -100,6 +101,14 @@ public class Window implements BatchListener {
 	 */
 	private void initialize() {
 		unarchiver = genUnarchiver(null, null);
+		
+		threadSlider = new JSlider();
+		threadSlider.setSnapToTicks(true);
+		threadSlider.setMinimum(1);
+		threadSlider.setMaximum(Runtime.getRuntime().availableProcessors());
+		threadSlider.setPreferredSize(new Dimension(77, 16));
+		threadSlider.setBorder(null);
+		
 		copyOperations = genCopyBatches();
 		processOperations = genProcessBatches(null);
 		
@@ -193,16 +202,13 @@ public class Window implements BatchListener {
 		gbc_lblThreads.gridy = 4;
 		frame.getContentPane().add(lblThreads, gbc_lblThreads);
 		
-		JSlider slider = new JSlider();
-		slider.setSnapToTicks(true);
-		slider.setPreferredSize(new Dimension(77, 16));
-		slider.setBorder(null);
+
 		GridBagConstraints gbc_slider = new GridBagConstraints();
 		gbc_slider.fill = GridBagConstraints.HORIZONTAL;
 		gbc_slider.insets = new Insets(0, 0, 5, 5);
 		gbc_slider.gridx = 1;
 		gbc_slider.gridy = 5;
-		frame.getContentPane().add(slider, gbc_slider);
+		frame.getContentPane().add(threadSlider, gbc_slider);
 		
 		JProgressBar progressBar = new CustomProgressBar();
 		progressBar.setStringPainted(true);
@@ -425,7 +431,7 @@ public class Window implements BatchListener {
 		contents.add(NavigationPanel, gbc_NavigationPanel);
 		NavigationPanel.setLayout(new BorderLayout(0, 0));
 		
-		JLabel lblKey = new JLabel("Key");
+		JLabel lblKey = new JLabel("Legend");
 		lblKey.setHorizontalAlignment(SwingConstants.CENTER);
 		NavigationPanel.add(lblKey);
 		
@@ -447,9 +453,9 @@ public class Window implements BatchListener {
 	
 	public Tab setupProgressTab(EJTabbedPane tabbedPane) {
 		Tab progressTab = tabbedPane.getTab(PROGRESS);
-		if(progressTab != null) {
+		/*if(progressTab != null) {
 			return progressTab;
-		}
+		}*/
 		
 		JPanel progressPanel = new JPanel();
 		Tab tab = new Tab(PROGRESS, null, progressPanel, null);
@@ -490,7 +496,9 @@ public class Window implements BatchListener {
 		gbc_separator.gridy = 0;
 		leftPanel.add(separator, gbc_separator);
 		BatchOperationComponent copyBatchComponent = new BatchOperationComponent(copyOperations);
+		copyOperations.addBatchListener(copyBatchComponent);
 		copyBatchComponent.setToolTipText("All Batches");
+		System.out.println(copyOperations.getBatches().size() + " OISHDFPIOHDFIUOSPHUIFSIDOHUOFHUIOSDHIFUHOHIUO");
 		
 		GridBagConstraints gbc_copyBatchComponent = new GridBagConstraints();
 		gbc_copyBatchComponent.fill = GridBagConstraints.BOTH;
@@ -678,6 +686,7 @@ public class Window implements BatchListener {
 		
 		copyOperations.addBatchListener(() -> {
 			SwingUtilities.invokeLater(() -> {
+				//lblResourcesCopiedCount.setText(copyBatchComponent.);
 				update();
 			});
 		});
@@ -810,7 +819,7 @@ public class Window implements BatchListener {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private BatchRunner<Pair<DecisionType, Callable<Void>>> genCopyBatches() {
-		BatchRunner<Pair<DecisionType, Callable<Void>>> batchRunner = new BatchRunner("Unarchive");
+		BatchRunner<Pair<DecisionType, Callable<Void>>> batchRunner = new BatchRunner("Unarchive", this.getUsableThreads());
 		try {
 			if(unarchiver != null) {
 				if(unarchiver.isValid()) {
@@ -848,6 +857,10 @@ public class Window implements BatchListener {
 	public void update() {
 		frame.invalidate();
 		frame.repaint();
+	}
+	
+	private int getUsableThreads() {
+		return Math.clamp(threadSlider.getValue(), 1, Runtime.getRuntime().availableProcessors());
 	}
 	
 }
