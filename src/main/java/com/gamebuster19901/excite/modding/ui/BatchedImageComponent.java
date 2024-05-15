@@ -75,7 +75,7 @@ public class BatchedImageComponent<T> extends ImageComponent implements BatchCon
         
         LinkedHashMap<Color, Integer> colors = new LinkedHashMap<>();
         colors.put(Color.GREEN, success);
-        colors.put(Color.BLUE, skipped);
+        colors.put(Color.CYAN.darker(), skipped);
         colors.put(Color.RED, failure);
         colors.put(Color.WHITE, working);
         colors.put(Color.ORANGE, other);

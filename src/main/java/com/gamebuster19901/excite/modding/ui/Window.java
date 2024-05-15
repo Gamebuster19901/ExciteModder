@@ -52,6 +52,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
 
 public class Window implements BatchListener {
 	
@@ -374,6 +377,11 @@ public class Window implements BatchListener {
 			//remove all
 		}
 		
+		JPanel contents = setupStatusNavigationPanel(tabbedPane);
+		
+
+		
+		Tab tab = new Tab(STATUS, null, contents, null);
 		JPanel statusGrid = new JPanel(new WrapLayout());
 		JScrollPane statusGridScroller = new JScrollPane(statusGrid);
 		
@@ -386,11 +394,55 @@ public class Window implements BatchListener {
 			i++;
 		}
 		
-		Tab tab = new Tab(STATUS, null, statusGridScroller, null);
+		GridBagConstraints gbc_statusGridScroller = new GridBagConstraints();
+		gbc_statusGridScroller.fill = GridBagConstraints.BOTH;
+		gbc_statusGridScroller.gridx = 0;
+		gbc_statusGridScroller.gridy = 1;
+		contents.add(statusGridScroller, gbc_statusGridScroller);
+		
+		statusGridScroller.getVerticalScrollBar().setUnitIncrement(175 / 2);
 		tabbedPane.addTab(tab.title(), tab.icon(), tab.component(), tab.tip()); //need to add this separately so the window builder can see it
 		
 		
 		return tab;
+	}
+	
+	private JPanel setupStatusNavigationPanel(EJTabbedPane tabbedPane) {
+		JPanel contents = new JPanel();
+		GridBagLayout gbl_contents = new GridBagLayout();
+		gbl_contents.columnWidths = new int[]{22, 0};
+		gbl_contents.rowHeights = new int[]{0, 13, 0};
+		gbl_contents.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_contents.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+		contents.setLayout(gbl_contents);
+		
+		JPanel NavigationPanel = new JPanel();
+		GridBagConstraints gbc_NavigationPanel = new GridBagConstraints();
+		gbc_NavigationPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_NavigationPanel.fill = GridBagConstraints.BOTH;
+		gbc_NavigationPanel.gridx = 0;
+		gbc_NavigationPanel.gridy = 0;
+		contents.add(NavigationPanel, gbc_NavigationPanel);
+		NavigationPanel.setLayout(new BorderLayout(0, 0));
+		
+		JLabel lblKey = new JLabel("Key");
+		lblKey.setHorizontalAlignment(SwingConstants.CENTER);
+		NavigationPanel.add(lblKey);
+		
+		JPanel keysPanel = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) keysPanel.getLayout();
+		flowLayout.setHgap(20);
+		flowLayout.setVgap(0);
+		NavigationPanel.add(keysPanel, BorderLayout.SOUTH);
+		
+		keysPanel.add(new ColorKeyComponent(Color.GRAY, "Not Started"));
+		keysPanel.add(new ColorKeyComponent(Color.ORANGE, "Other"));
+		keysPanel.add(new ColorKeyComponent(Color.WHITE, "Working"));
+		keysPanel.add(new ColorKeyComponent(Color.RED, "Failure"));
+		keysPanel.add(new ColorKeyComponent(Color.CYAN.darker(), "Skipped"));
+		keysPanel.add(new ColorKeyComponent(Color.GREEN, "Success"));
+		
+		return contents;
 	}
 	
 	public Tab setupProgressTab(EJTabbedPane tabbedPane) {

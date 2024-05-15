@@ -1,5 +1,6 @@
 package com.gamebuster19901.excite.modding.ui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 
@@ -13,6 +14,7 @@ import java.awt.GridBagConstraints;
 import javax.swing.JTabbedPane;
 import java.awt.Insets;
 import java.util.Random;
+import javax.swing.JScrollPane;
 
 public class TestWindow {
 
@@ -67,8 +69,6 @@ public class TestWindow {
 		gbl_panel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
-		BatchOperationComponent c = new BatchOperationComponent(r);
-		c.setPreferredSize(new Dimension(150, 175));
 		for(int i = 0; i < 20; i++) {
 			final int j = i;
 			batch.addRunnable(() -> {
@@ -85,17 +85,58 @@ public class TestWindow {
 
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		GridBagConstraints gbc_c = new GridBagConstraints();
-		gbc_c.anchor = GridBagConstraints.NORTHWEST;
-		gbc_c.insets = new Insets(0, 0, 0, 5);
-		gbc_c.gridx = 0;
-		gbc_c.gridy = 0;
-		tabbedPane.add(c, gbc_c);
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
 		gbc_tabbedPane.anchor = GridBagConstraints.WEST;
 		gbc_tabbedPane.gridx = 1;
 		gbc_tabbedPane.gridy = 0;
 		panel.add(tabbedPane, gbc_tabbedPane);
+		
+		JPanel panel_1 = new JPanel();
+		tabbedPane.addTab("New tab", null, panel_1, null);
+		GridBagLayout gbl_panel_1 = new GridBagLayout();
+		gbl_panel_1.columnWidths = new int[]{0, 0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 178, 0};
+		gbl_panel_1.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
+		panel_1.setLayout(gbl_panel_1);
+		
+		ColorKeyComponent lblNewLabel = new ColorKeyComponent(Color.RED, "Errorifying, really weird");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 0;
+		panel_1.add(lblNewLabel, gbc_lblNewLabel);
+		
+		ColorKeyComponent lblNewLabel_1 = new ColorKeyComponent(Color.RED, "Error");
+		GridBagLayout gridBagLayout_1 = (GridBagLayout) lblNewLabel_1.getLayout();
+		gridBagLayout_1.rowWeights = new double[]{0.0};
+		gridBagLayout_1.rowHeights = new int[]{25};
+		gridBagLayout_1.columnWeights = new double[]{0.0, 1.0};
+		gridBagLayout_1.columnWidths = new int[]{25, 78};
+		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel_1.fill = GridBagConstraints.BOTH;
+		gbc_lblNewLabel_1.gridx = 1;
+		gbc_lblNewLabel_1.gridy = 0;
+		panel_1.add(lblNewLabel_1, gbc_lblNewLabel_1);
+		
+
+		
+		BatchOperationComponent c = new BatchOperationComponent(r);
+		
+		JScrollPane scrollPane = new JScrollPane(c);
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.gridwidth = 2;
+		gbc_scrollPane.anchor = GridBagConstraints.NORTHWEST;
+		gbc_scrollPane.gridx = 0;
+		gbc_scrollPane.gridy = 1;
+		panel_1.add(scrollPane, gbc_scrollPane);
+		c.setPreferredSize(new Dimension(150, 175));
+		GridBagConstraints gbc_c = new GridBagConstraints();
+		gbc_c.anchor = GridBagConstraints.NORTHWEST;
+		gbc_c.insets = new Insets(0, 0, 0, 5);
+		gbc_c.gridx = 0;
+		gbc_c.gridy = 0;
 		GridBagConstraints gbc_panel = new GridBagConstraints();
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
