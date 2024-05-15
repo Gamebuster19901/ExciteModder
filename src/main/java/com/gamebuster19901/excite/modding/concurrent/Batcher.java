@@ -3,14 +3,12 @@ package com.gamebuster19901.excite.modding.concurrent;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
-import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
-
 public interface Batcher<T> extends BatchContainer<T> {
 	
 	public abstract void addRunnable(Callable<T> runnable);
 
 	public abstract void addRunnable(Runnable runnable);
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public default void addRunnables(Collection<?> runnables) {
 		if(runnables.size() > 0) {
@@ -33,15 +31,5 @@ public interface Batcher<T> extends BatchContainer<T> {
 			return;
 		}
 	}
-	
-	public abstract void addListener(BatchListener listener);
-	
-	public void shutdownNow() throws InterruptedException;
-	
-	public Collection<BatchedCallable<T>> getRunnables();
-	
-	public Collection<BatchListener> getListeners();
-	
-	public void updateListeners();
 	
 }

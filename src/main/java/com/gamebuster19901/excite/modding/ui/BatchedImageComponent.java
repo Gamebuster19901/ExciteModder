@@ -4,17 +4,19 @@ import java.awt.Color;
 import java.awt.Image;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+
 import com.gamebuster19901.excite.modding.concurrent.BatchListener;
 import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
 import com.gamebuster19901.excite.modding.concurrent.BatchContainer;
 
-public class BatchedImageComponent extends ImageComponent implements BatchContainer {
+public class BatchedImageComponent<T> extends ImageComponent implements BatchContainer<T>, BatchListener {
 
-	private final BatchContainer batch;
+	private final BatchContainer<T> batch;
 	
-	public BatchedImageComponent(BatchContainer batch) {
+	public BatchedImageComponent(BatchContainer<T> batch) {
 		super(batch.getName());
 		this.batch = batch;
+		addBatchListener(this);
 	}
 	
 	@Override
@@ -56,9 +58,8 @@ public class BatchedImageComponent extends ImageComponent implements BatchContai
         return StripedImageGenerator.generateImage(getWidth(), getHeight(), (LinkedHashMap<Color, Integer>) colors);
 	}
 
-
 	@Override
-	public Collection<BatchedCallable> getRunnables() {
+	public Collection<BatchedCallable<T>> getRunnables() {
 		return batch.getRunnables();
 	}
 
@@ -68,9 +69,19 @@ public class BatchedImageComponent extends ImageComponent implements BatchContai
 	}
 
 	@Override
+	public void addBatchListener(BatchListener listener) {
+		batch.addBatchListener(listener);
+	}
+
+	@Override
 	public void update() {
-		revalidate();
 		repaint();
+		System.out.println("Updated");
+	}
+
+	@Override
+	public void shutdownNow() throws InterruptedException {
+		batch.shutdownNow();
 	}
 	
 }

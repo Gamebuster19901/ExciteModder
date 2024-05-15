@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
 
-public class BatchRunner<T> implements BatchWorker<T> {
+public class BatchRunner<T> implements BatchWorker<T>, BatcherContainer<T> {
 
 	private final String name;
 	private final ExecutorService executor;
@@ -106,10 +106,11 @@ public class BatchRunner<T> implements BatchWorker<T> {
 			listenerAdded = true;
 		}
 		for(Batcher<T> batch : batches) {
-			batch.addListener(listener);
+			batch.addBatchListener(listener);
 		}
 	}
 	
+	@Override
 	public Collection<Batcher<T>> getBatches() {
 		return (Collection<Batcher<T>>) batches.clone();
 	}
@@ -119,11 +120,6 @@ public class BatchRunner<T> implements BatchWorker<T> {
 		Collection<BatchedCallable<T>> callables = getRunnables();
 		for(BatchedCallable<T> callable : callables) {ret++;}
 		return ret;
-	}
-
-	@Override
-	public void update() {
-		//NO-OP
 	}
 	
 }

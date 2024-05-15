@@ -9,7 +9,7 @@ public class QuickAccessArchive {
 
 	private final Toc toc;
 	private final Path archivePath;
-	private volatile Archive archive;
+	private volatile Archive archive; //This MUST be volatile or double checked locking will not work!
 	
 	public QuickAccessArchive(Toc toc, Path archivePath) {
 		this.toc = toc;

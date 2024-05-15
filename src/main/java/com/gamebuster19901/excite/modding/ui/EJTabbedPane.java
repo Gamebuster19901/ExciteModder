@@ -100,9 +100,8 @@ public class EJTabbedPane extends JTabbedPane {
 	 * 
 	 * @param index The index of the tab to retrieve.
 	 * @return A `Tab` object representing the tab at the specified index, or null if the index is invalid.
-	 * @throws IndexOutOfBoundsException if the index is invalid.
 	 */
-	public Tab getTab(int index) throws IndexOutOfBoundsException {
+	public Tab getTab(int index) {
 		if(index < 0 || index > this.getComponentCount()) {
 			return null;
 		}

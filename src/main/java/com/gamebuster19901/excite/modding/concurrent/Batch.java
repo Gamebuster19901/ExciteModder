@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import static java.lang.Thread.State;
 
 public class Batch<T> implements Batcher<T> {
@@ -49,7 +50,7 @@ public class Batch<T> implements Batcher<T> {
     }
     
     @Override
-    public void addListener(BatchListener listener) {
+    public void addBatchListener(BatchListener listener) {
     	if(accepting) {
 	    	if(!listeners.add(listener)) {
 	    		System.out.println("Warning: duplicate batch listener ignored.");
@@ -234,8 +235,4 @@ public class Batch<T> implements Batcher<T> {
 		}
     }
 
-	@Override
-	public void update() {
-		//NO-OP
-	}
  }
