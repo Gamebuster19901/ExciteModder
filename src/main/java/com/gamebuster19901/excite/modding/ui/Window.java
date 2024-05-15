@@ -30,12 +30,15 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.gamebuster19901.excite.modding.concurrent.Batch;
 import com.gamebuster19901.excite.modding.concurrent.BatchListener;
 import com.gamebuster19901.excite.modding.concurrent.BatchRunner;
 import com.gamebuster19901.excite.modding.concurrent.Batcher;
 import com.gamebuster19901.excite.modding.ui.EJTabbedPane.Tab;
 import com.gamebuster19901.excite.modding.unarchiver.Unarchiver;
+import com.gamebuster19901.excite.modding.unarchiver.concurrent.DecisionType;
 import com.gamebuster19901.excite.modding.util.FileUtils;
 import com.gamebuster19901.excite.modding.util.SplitOutputStream;
 
@@ -61,7 +64,7 @@ public class Window implements BatchListener {
 	private JTextField textFieldDest;
 	
 	private volatile Unarchiver unarchiver;
-	private volatile BatchRunner<Callable<Void>> copyOperations;
+	private volatile BatchRunner<Pair<DecisionType, Callable<Void>>> copyOperations;
 	private volatile BatchRunner<Void> processOperations;
 
 	/**
@@ -330,7 +333,7 @@ public class Window implements BatchListener {
 		tabbedPane.addTab(statusTab);
 		tabbedPane.addTab(progressTab);
 		
-		for(Batcher<Callable<Void>> b : copyOperations.getBatches()) {
+		for(Batcher<Pair<DecisionType, Callable<Void>>> b : copyOperations.getBatches()) {
 			tabbedPane.addTab(b.getName(), new JPanel());
 		}
 		
@@ -374,7 +377,7 @@ public class Window implements BatchListener {
 		JPanel statusGrid = new JPanel(new WrapLayout());
 		JScrollPane statusGridScroller = new JScrollPane(statusGrid);
 		
-		Iterator<Batcher<Callable<Void>>> batches = copyOperations.getBatches().iterator();
+		Iterator<Batcher<Pair<DecisionType, Callable<Void>>>> batches = copyOperations.getBatches().iterator();
 		int i = 0;
 		while(batches.hasNext()) {
 			BatchOperationComponent b = new BatchOperationComponent(batches.next());
@@ -754,19 +757,19 @@ public class Window implements BatchListener {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private BatchRunner<Callable<Void>> genCopyBatches() {
-		BatchRunner<Callable<Void>> batchRunner = new BatchRunner("Unarchive");
+	private BatchRunner<Pair<DecisionType, Callable<Void>>> genCopyBatches() {
+		BatchRunner<Pair<DecisionType, Callable<Void>>> batchRunner = new BatchRunner("Unarchive");
 		try {
 			if(unarchiver != null) {
 				if(unarchiver.isValid()) {
-					for(Batch<Callable<Void>> batch : unarchiver.getCopyBatches()) {
+					for(Batch<Pair<DecisionType, Callable<Void>>> batch : unarchiver.getCopyBatches()) {
 						batchRunner.addBatch(batch);
 					}
 				}
 			}
 		}
 		catch(Throwable t) {
-			Batch<Callable<Void>> errBatch = new Batch<>("Error");
+			Batch<Pair<DecisionType, Callable<Void>>> errBatch = new Batch<>("Error");
 			errBatch.addRunnable(() -> {
 				throw t;
 			});

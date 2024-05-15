@@ -5,7 +5,10 @@ import java.awt.Image;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.gamebuster19901.excite.modding.concurrent.BatchListener;
+import com.gamebuster19901.excite.modding.unarchiver.concurrent.DecisionType;
 import com.gamebuster19901.excite.modding.concurrent.Batch.BatchedCallable;
 import com.gamebuster19901.excite.modding.concurrent.BatchContainer;
 
@@ -23,6 +26,7 @@ public class BatchedImageComponent<T> extends ImageComponent implements BatchCon
 	public Image getImage() {
 		System.out.println("Image");
 		int _new = 0;
+		int skipped = 0;
         int working = 0;
         int success = 0;
         int failure = 0;
@@ -37,9 +41,30 @@ public class BatchedImageComponent<T> extends ImageComponent implements BatchCon
                     working++;
                     continue;
                 case TERMINATED:
-                    if(runnable.getThrown() == null) {
-                    	success++;
+                    if(runnable.getThrown() != null) {
+                    	failure++;
                     	continue;
+                    }
+                    Object r = runnable.getResult();
+                    if (r instanceof Pair) {
+                    	Object key = ((Pair) r).getKey();
+                    	if(key instanceof DecisionType) {
+                    		DecisionType decision = (DecisionType) key;
+                    		switch(decision) {
+							case IGNORE:
+								failure++;
+								continue;
+							case PROCEED:
+								success++;
+								continue;
+							case SKIP:
+								skipped++;
+								continue;
+							default:
+								other++;
+								continue;
+                    		}
+                    	}
                     }
                     failure++;
                     continue;
@@ -50,6 +75,7 @@ public class BatchedImageComponent<T> extends ImageComponent implements BatchCon
         
         LinkedHashMap<Color, Integer> colors = new LinkedHashMap<>();
         colors.put(Color.GREEN, success);
+        colors.put(Color.BLUE, skipped);
         colors.put(Color.RED, failure);
         colors.put(Color.WHITE, working);
         colors.put(Color.ORANGE, other);

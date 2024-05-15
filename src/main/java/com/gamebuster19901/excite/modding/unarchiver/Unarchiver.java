@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.gamebuster19901.excite.modding.concurrent.Batch;
 import com.gamebuster19901.excite.modding.game.file.kaitai.TocMonster.Details;
+import com.gamebuster19901.excite.modding.unarchiver.concurrent.DecisionType;
 import com.gamebuster19901.excite.modding.util.FileUtils;
 
 public class Unarchiver {
@@ -28,16 +31,16 @@ public class Unarchiver {
 		refresh();
 	}
 	
-	public Collection<Batch<Callable<Void>>> getCopyBatches() {
-		LinkedHashSet<Batch<Callable<Void>>> batches = new LinkedHashSet<>();
+	public Collection<Batch<Pair<DecisionType, Callable<Void>>>> getCopyBatches() {
+		LinkedHashSet<Batch<Pair<DecisionType, Callable<Void>>>> batches = new LinkedHashSet<>();
 		for(Path toc : tocs) {
 			batches.add(getCopyBatch(toc));
 		}
 		return batches;
 	}
 	
-	public Batch<Callable<Void>> getCopyBatch(Path tocFile) {
-		Batch<Callable<Void>> batch = new Batch<>(tocFile.getFileName().toString());
+	public Batch<Pair<DecisionType, Callable<Void>>> getCopyBatch(Path tocFile) {
+		Batch<Pair<DecisionType, Callable<Void>>> batch = new Batch<>(tocFile.getFileName().toString());
 		try {
 			Toc toc = new Toc(tocFile.toAbsolutePath());
 			List<Details> details = toc.getFiles();
@@ -50,23 +53,20 @@ public class Unarchiver {
 						System.out.println(tocFile.getFileName() + "/" + resourceName);
 						archive.getArchive().getFile(resourceName).writeTo(destDir.resolve(resourceName));
 						if(resource.name().endsWith("tex")) {
-							return () -> {
-								System.out.println("This is an example of processing a texture!");
-								return null;
-							};
+							return Pair.of(DecisionType.SKIP, () -> {return null;});
 						}
 					}
 					catch(Throwable t) {
-						throw t;
+						return Pair.of(DecisionType.IGNORE, () -> {throw t;});
 					}
-					return null;
+					return Pair.of(DecisionType.PROCEED, () -> {return null;});
 				});
 			}
 
 		}
 		catch(Throwable t) {
 			batch.addRunnable(() -> {
-				throw t; //let the batchrunner know that an error occurred
+				return Pair.of(DecisionType.IGNORE, () -> {throw t;}); //let the batchrunner know that an error occurred
 			});
 		}
 		return batch;

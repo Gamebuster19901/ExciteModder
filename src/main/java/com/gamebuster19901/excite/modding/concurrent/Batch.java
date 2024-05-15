@@ -1,6 +1,6 @@
 package com.gamebuster19901.excite.modding.concurrent;
 
-import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -23,6 +23,16 @@ public class Batch<T> implements Batcher<T> {
     @Override
     public String getName() {
     	return name;
+    }
+    
+    public void addRunnable(BatchedCallable<T> batchedCallable) {
+    	if(accepting) {
+    		runnables.add(batchedCallable);
+    		updateListeners();
+    	}
+    	else {
+    		notAccepting();
+    	}
     }
     
     @Override
@@ -105,8 +115,10 @@ public class Batch<T> implements Batcher<T> {
     	
     	private final Batcher<T> batch;
     	private final Callable<T> child;
-    	private volatile SoftReference<Thread> threadRef;
+    	private volatile WeakReference<Thread> threadRef;
     	protected volatile Throwable thrown;
+    	private final Object startLock = new Object();
+    	private volatile Boolean started = false;
     	protected volatile boolean finished = false;
     	protected volatile T result;
     	
@@ -148,6 +160,8 @@ public class Batch<T> implements Batcher<T> {
          * This method executes the wrapped `Callable` object and stores the result. It also updates the state of this object
          * and notifies the associated Batcher before and after execution. If any exceptions occur during execution, they are
          * stored but not re-thrown by this method. The caller of this method is responsible for handling any exceptions.
+         * 
+         * The behavior of this callable is undefined if call() is executed more than once.
 		 *
          * @return the result of the wrapped callable's execution (which may be null), or null if an exception occurred
          */
@@ -156,7 +170,7 @@ public class Batch<T> implements Batcher<T> {
 			Thread thread;
 			try {
 				thread = Thread.currentThread();
-				threadRef = new SoftReference<>(thread);
+				threadRef = new WeakReference<>(thread);
 				batch.updateListeners();
 				result = child.call();
 				return result;
