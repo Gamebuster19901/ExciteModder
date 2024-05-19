@@ -50,7 +50,7 @@ public class Unarchiver {
 				batch.addRunnable(() -> {
 					try {
 						String resourceName = resource.name();
-						Path dest = destDir.resolve(tocFile.getFileName()).resolve(resourceName);
+						Path dest = destDir.resolve(tocFile.getFileName());
 						System.out.println(tocFile.getFileName() + "/" + resourceName);
 						archive.getArchive().getFile(resourceName).writeTo(dest);
 						if(resource.name().endsWith("tex")) {
