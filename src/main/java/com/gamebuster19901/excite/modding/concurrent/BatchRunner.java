@@ -15,7 +15,6 @@ public class BatchRunner<T> implements BatchWorker<T>, BatcherContainer<T> {
 	private final String name;
 	private final ExecutorService executor;
 	private final LinkedHashSet<Batcher<T>> batches = new LinkedHashSet<Batcher<T>>();
-	private volatile boolean started = false;
 	private volatile boolean listenerAdded = false;
 	
     public BatchRunner(String name) {
@@ -58,7 +57,6 @@ public class BatchRunner<T> implements BatchWorker<T>, BatcherContainer<T> {
 				throw new IllegalStateException("BatchRunner has already been started!");
 			}
 			synchronized(batches) {
-				started = true;
 				ArrayList<BatchedCallable<T>> batchers = new ArrayList<>(getRunnables());
 				Collections.shuffle(batchers); //So multiple threads don't wait for a single archive to lazily load, allows multiple archives to lazily load at a time
 				executor.invokeAll(batchers);
