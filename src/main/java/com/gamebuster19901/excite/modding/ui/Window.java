@@ -288,15 +288,14 @@ public class Window implements BatchListener {
 							return;
 						}
 						
-						new Thread(() -> {
-							try {
-								copyOperations.startBatch();
-							} catch (InterruptedException e1) {
-								throw new RuntimeException(e1);
-							}
-						}).start();
-						
 					}
+					new Thread(() -> {
+						try {
+							copyOperations.startBatch();
+						} catch (InterruptedException e1) {
+							throw new RuntimeException(e1);
+						}
+					}).start();
 				}
 				
 				
