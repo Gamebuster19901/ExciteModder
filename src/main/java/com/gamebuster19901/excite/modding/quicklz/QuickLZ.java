@@ -19,6 +19,26 @@ public class QuickLZ {
 		decompress
 	}
 	
+	public static enum ExitCode {
+		SUCCESS,
+		HELP_SUCCESS,
+		UNKNOWN_MODE,
+		MISSING_MODE_ARG,
+		MISSING_SOURCE_ARG,
+		MISSING_DEST_ARG,
+		TOO_MANY_ARGS,
+		SOURCE_ERR,
+		DEST_ERR,
+		UNKNOWN;
+		
+		public static ExitCode get(int i) {
+			if(i < values().length && i >= 0) {
+				return values()[i];
+			}
+			return UNKNOWN;
+		}
+	}
+	
 	private static final QuickLZImpl impl = QuickLZImpl.get();
 	
 	public static void compress(Path file, Path dest) {
