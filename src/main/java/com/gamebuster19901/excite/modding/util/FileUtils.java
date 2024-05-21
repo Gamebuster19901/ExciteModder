@@ -151,6 +151,11 @@ public class FileUtils {
 		 int i = fileName.lastIndexOf('.');
 		 return (i == -1) ? fileName : fileName.substring(0, i);
 	}
+	
+	public static String getExtension(String fileName) {
+		int i = fileName.lastIndexOf('.');
+		return i == -1 ? "" : fileName.substring(i + 1);		
+	}
 
 	public static boolean isDirectory(Path dir) {
 		return Files.isDirectory(dir) && !Files.isSymbolicLink(dir);

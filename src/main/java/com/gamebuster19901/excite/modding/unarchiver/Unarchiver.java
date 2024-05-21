@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -31,6 +32,10 @@ public class Unarchiver {
 		refresh();
 	}
 	
+	public Collection<Path> getTocs() {
+		return Collections.unmodifiableCollection(tocs);
+	}
+	
 	public Collection<Batch<Pair<DecisionType, Callable<Void>>>> getCopyBatches() {
 		LinkedHashSet<Batch<Pair<DecisionType, Callable<Void>>>> batches = new LinkedHashSet<>();
 		for(Path toc : tocs) {
@@ -45,29 +50,31 @@ public class Unarchiver {
 			Toc toc = new Toc(tocFile.toAbsolutePath());
 			List<Details> details = toc.getFiles();
 			
-			final QuickAccessArchive archive = getArchive(toc);
+			final QuickAccessArchive QArchive = getArchive(toc);
 			for(Details resource : details) {
 				batch.addRunnable(() -> {
 					try {
 						String resourceName = resource.name();
 						Path dest = destDir.resolve(tocFile.getFileName());
 						System.out.println(tocFile.getFileName() + "/" + resourceName);
-						archive.getArchive().getFile(resourceName).writeTo(dest);
+						Archive archive = QArchive.getArchive();
+						ArchivedFile f = archive.getFile(resourceName);
+						f.writeTo(dest);
 						if(resource.name().endsWith("tex")) {
-							return Pair.of(DecisionType.SKIP, () -> {return null;});
+							return Pair.of(DecisionType.SKIP, () -> {return null;}); //the asset was successfully extracted, but we don't know how to process it
 						}
+						return Pair.of(DecisionType.PROCEED, () -> {return null;}); //the asset was successfully extracted, and will be submitted to the next batchRunner to convert into a viewable format
 					}
 					catch(Throwable t) {
-						return Pair.of(DecisionType.IGNORE, () -> {throw t;});
+						return Pair.of(DecisionType.IGNORE, () -> {throw t;}); //let the next batchrunner that an error ocurred, and will not be submitted to the next batchrunner.
 					}
-					return Pair.of(DecisionType.PROCEED, () -> {return null;});
 				});
 			}
 
 		}
 		catch(Throwable t) {
 			batch.addRunnable(() -> {
-				return Pair.of(DecisionType.IGNORE, () -> {throw t;}); //let the batchrunner know that an error occurred
+				return Pair.of(DecisionType.IGNORE, () -> {throw t;}); //let the next batchrunner know that an error occurred
 			});
 		}
 		return batch;
@@ -77,7 +84,7 @@ public class Unarchiver {
 		return FileUtils.isDirectory(sourceDir) && FileUtils.isDirectory(destDir);
 	}
 	
-	private QuickAccessArchive getArchive(Toc toc) throws IOException {
+	public QuickAccessArchive getArchive(Toc toc) throws IOException {
 		for(Path archivePath : archives) {
 			if(getFileName(toc.getFile()).equals(getFileName(archivePath))) {
 				return new QuickAccessArchive(toc, archivePath);
