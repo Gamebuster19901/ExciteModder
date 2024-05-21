@@ -60,6 +60,7 @@ public class BatchRunner<T> implements BatchWorker<T>, BatcherContainer<T> {
 				ArrayList<BatchedCallable<T>> batchers = new ArrayList<>(getRunnables());
 				Collections.shuffle(batchers); //So multiple threads don't wait for a single archive to lazily load, allows multiple archives to lazily load at a time
 				executor.invokeAll(batchers);
+				executor.close();
 			}
 		}
 	}
